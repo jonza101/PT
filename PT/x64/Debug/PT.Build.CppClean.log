@@ -1,13 +1,14 @@
 d:\vs_project\pt\pt\x64\debug\vc141.pdb
 d:\vs_project\pt\pt\x64\debug\vc141.idb
 d:\vs_project\pt\pt\x64\debug\vec_math.obj
+d:\vs_project\pt\pt\x64\debug\sphere.obj
 d:\vs_project\pt\pt\x64\debug\main.obj
 d:\vs_project\pt\pt\x64\debug\init.obj
 d:\vs_project\pt\pt\x64\debug\gpu_scene.obj
 x64\debug\init_gpu_kernel.cu.obj
 x64\debug\render.cu.obj
-d:\vs_project\pt\x64\debug\pt.ilk
 d:\vs_project\pt\x64\debug\pt.exe
+d:\vs_project\pt\x64\debug\pt.ilk
 d:\vs_project\pt\x64\debug\pt.pdb
 d:\vs_project\pt\x64\debug\pt.lib
 d:\vs_project\pt\x64\debug\pt.exp

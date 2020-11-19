@@ -5,10 +5,10 @@
 void	PT::cpy_gpu_camera()
 {
 	this->h_cam->pos = this->cam.pos;
-	
-	this->h_cam->pitch = this->cam.pitch;
-	this->h_cam->yaw = this->cam.yaw;
-	this->h_cam->roll = this->cam.roll;
+
+	this->h_cam->forward = this->cam.forward;
+	this->h_cam->up = this->cam.up;
+	this->h_cam->right = this->cam.right;
 
 	this->h_cam->aspect_ratio = this->aspect_ratio;
 	this->h_cam->scale = this->scale;
@@ -58,4 +58,7 @@ void	PT::malloc_gpu_scene()
 	this->h_cam = (gpu_cam*)malloc(sizeof(gpu_cam));
 	if ((this->cuda_status = cudaMallocManaged(&this->d_cam, sizeof(gpu_cam))) != cudaSuccess)
 		std::cout << "d_cam cudaMallocManaged error " << this->cuda_status << ": " << cudaGetErrorName(this->cuda_status) << '\n';
+
+
+	this->d_tex = image::d_malloc(this->h_tex, this->cuda_status);
 }

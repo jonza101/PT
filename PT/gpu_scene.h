@@ -3,13 +3,16 @@
 #include <cuda_runtime.h>
 
 
+#define MAX_BOUNCES 10
+
+
 struct				gpu_cam
 {
 	float3			pos;
 
-	float			pitch;
-	float			yaw;
-	float			roll;
+	float3			forward;
+	float3			up;
+	float3			right;
 
 	float			aspect_ratio;
 	float			scale;
@@ -24,11 +27,8 @@ struct				d_light_data
 	int				obj_id;
 
 	float3			pos;
-
 	float3			emission;
-	float			constant;
-	float			linear;
-	float			quadratic;
+	float			intensity;
 };
 
 struct				d_obj_data
@@ -41,8 +41,15 @@ struct				d_obj_data
 
 	float3			emission;
 
+	int				albedo_id;
+	int				metalness_id;
+	int				roughness_id;
+	int				normal_id;
+
+	float2			uv_scale;
+
 	float3			albedo;
-	float			metallness;
+	float			metalness;
 	float			roughness;
 
 

@@ -24,14 +24,19 @@ public:
 	float3			pos;
 	float3			orientation;
 
+	int				albedo_id = -1;
+	int				metalness_id = -1;
+	int				roughness_id = -1;
+	int				normal_id = -1;
+
 	float3			albedo;
-	float			metallness;
+	float			metalness;
 	float			roughness;
 
+	float2			uv_scale;
+
 	float3			emission;
-	float			constant;
-	float			linear;
-	float			quadratic;
+	float			intensity;
 
 
 	virtual void	d_malloc(gpu_scene *h_scene, const int id, cudaError_t &cuda_status) = 0;
@@ -42,17 +47,7 @@ public:
 		h_scene->light[light_id].obj_id = obj_id;
 
 		h_scene->light[light_id].pos = this->pos;
-
 		h_scene->light[light_id].emission = this->emission;
-		h_scene->light[light_id].constant = this->constant;
-		h_scene->light[light_id].linear = this->linear;
-		h_scene->light[light_id].quadratic = this->quadratic;
-	}
-
-	void			set_light_propeties(float constant, float linear, float quadratic)
-	{
-		this->constant = constant;
-		this->linear = linear;
-		this->quadratic = quadratic;
+		h_scene->light[light_id].intensity = this->intensity;
 	}
 };

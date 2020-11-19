@@ -13,6 +13,8 @@
 #include <curand_kernel.h>
 #include <math.h>
 
+#include <float.h>
+
 
 #include <iostream>
 #include <vector>
@@ -20,13 +22,15 @@
 
 #include "camera.h"
 #include "gpu_scene.h"
+#include "image.h"
 
 #include "sphere.h"
 #include "plane.h"
 
 
 #define EPSILON 0.000001f
-#define PDF_CONST (1.0f / (2.0f * M_PI))
+
+#define PDF_CONST ((float)1.0 / (float)(2.0f * M_PI))
 #define HDR_CONST (1.0f / 2.2f)
 
 
@@ -44,8 +48,11 @@ private:
 		this->win_wh.y = h;
 		this->aspect_ratio = (float)w / (float)h;
 
-		if (cudaMalloc(&this->d_data, sizeof(int) * this->win_wh.x * this->win_wh.y))
+		if ((this->cuda_status = cudaMallocManaged(&this->d_data, sizeof(int) * this->win_wh.x * this->win_wh.y)) != cudaSuccess)
 			std::cout << "d_data cudaMalloc error\n";
+
+		if ((this->cuda_status = cudaMallocManaged(&this->d_data_f, sizeof(float3) * this->win_wh.x * this->win_wh.y)) != cudaSuccess)
+			std::cout << "d_data_f cudaMalloc error\n";
 	}
 
 public:
@@ -78,6 +85,9 @@ public:
 
 	void	render();
 
+
+	void	screenshot(const char *file_path);
+
 private:
 	SDL_Window				*win;
 	SDL_Renderer			*ren;
@@ -86,6 +96,7 @@ private:
 
 	int						*h_data;
 	int						*d_data;
+	float3					*d_data_f;
 
 
 	camera					cam;
@@ -109,6 +120,9 @@ private:
 
 	gpu_cam					*h_cam;
 	gpu_cam					*d_cam;
+
+	gpu_tex					*h_tex;
+	gpu_tex					*d_tex;
 };
 
 

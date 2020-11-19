@@ -7,6 +7,12 @@
     <Filter Include="inc">
       <UniqueIdentifier>{6f039645-1886-4ea6-8ca6-35848dd1f4d9}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\cuda">
+      <UniqueIdentifier>{e24085e4-c219-4d8d-8da3-f75112b2ac07}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\sphere">
+      <UniqueIdentifier>{604c9fb6-c284-4705-a1e6-2c27b63cba66}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="init.cpp">
@@ -20,6 +26,9 @@
     </ClCompile>
     <ClCompile Include="gpu_scene.cpp">
       <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="sphere.cpp">
+      <Filter>src\sphere</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -44,13 +53,16 @@
     <ClInclude Include="plane.h">
       <Filter>inc</Filter>
     </ClInclude>
+    <ClInclude Include="image.h">
+      <Filter>inc</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <CudaCompile Include="init_gpu_kernel.cu">
-      <Filter>src</Filter>
-    </CudaCompile>
     <CudaCompile Include="render.cu">
-      <Filter>src</Filter>
+      <Filter>src\cuda</Filter>
+    </CudaCompile>
+    <CudaCompile Include="init_gpu_kernel.cu">
+      <Filter>src\cuda</Filter>
     </CudaCompile>
   </ItemGroup>
 </Project>

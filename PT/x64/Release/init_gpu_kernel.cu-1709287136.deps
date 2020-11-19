@@ -175,6 +175,7 @@ c:\program files\nvidia gpu computing toolkit\cuda\v11.1\include\vector_function
 c:\program files\nvidia gpu computing toolkit\cuda\v11.1\include\vector_types.h
 d:\vs_project\pt\pt\camera.h
 d:\vs_project\pt\pt\gpu_scene.h
+d:\vs_project\pt\pt\image.h
 D:\vs_project\PT\PT\init_gpu_kernel.cu
 d:\vs_project\pt\pt\plane.h
 d:\vs_project\pt\pt\pt.h
