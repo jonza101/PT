@@ -11,21 +11,30 @@
 #include <vector>
 
 
-struct		gpu_tex
+enum tex_wrapping
 {
-	int		count;
-
-	int2	*wh;
-	int		*data;
-	size_t	*offset;
+	TW_REPEAT,
+	TW_CLAMP
 };
 
 
-struct		image_data
+struct				gpu_tex
 {
-	int		w;
-	int		h;
-	int		*data;
+	int				count;
+
+	int2			*wh;
+	int				*data;
+	size_t			*offset;
+};
+
+
+struct				image_data
+{
+	tex_wrapping	tw_mode;
+
+	int				w;
+	int				h;
+	int				*data;
 };
 
 class image

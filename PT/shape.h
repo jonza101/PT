@@ -5,6 +5,7 @@
 #include <iostream>
 #include <algorithm>
 
+#include "vec_math.h"
 #include "gpu_scene.h"
 
 
@@ -12,6 +13,7 @@ enum obj_type
 {
 	SPHERE,
 	PLANE,
+	TRIANGLE,
 	SHAPE_TYPE_COUNT
 };
 
@@ -35,7 +37,7 @@ public:
 
 	float2			uv_scale;
 
-	float3			emission;
+	float3			emission = make_float3(0.0f, 0.0f, 0.0f);
 	float			intensity;
 
 
@@ -50,4 +52,17 @@ public:
 		h_scene->light[light_id].emission = this->emission;
 		h_scene->light[light_id].intensity = this->intensity;
 	}
+};
+
+
+struct					mesh_material_data
+{
+	int					albedo_id = -1;
+	int					metalness_id = -1;
+	int					roughness_id = -1;
+	int					normal_id = -1;
+
+	float3				albedo;
+	float				metalness;
+	float				roughness;
 };

@@ -5,10 +5,10 @@
 class plane : public shape
 {
 public:
-	plane(const float3 &pos, const float3 &orientation, const float3 &albedo, float metalness, float roughness, const float3 &emission)
+	plane(const float3 &pos, const float3 &orientation, const float3 &albedo, float metalness, float roughness)
 	{
 		this->type = PLANE;
-		this->is_light = (emission.x > 0.0f || emission.y > 0.0f || emission.z > 0.0f);
+		this->is_light = 0;
 
 		this->pos = pos;
 		this->orientation = orientation;
@@ -16,8 +16,6 @@ public:
 		this->albedo = albedo;
 		this->metalness = metalness;
 		this->roughness = roughness;
-
-		this->emission = emission;
 	}
 
 

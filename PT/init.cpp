@@ -46,16 +46,19 @@ int image::id_iter = 0;
 std::vector<image_data>	image::images;
 size_t image::pix = 0;
 
+int mesh::id_iter = 0;
+std::vector<mesh_data> mesh::meshes;
+
 
 void	PT::init()
 {
 	this->gpu_init();
 
 
-	//int rm_albedo = image::load_image("resources/rm/rm_albedo.png");
-	//int rm_metalness = image::load_image("resources/rm/rm_metalness.png");
-	//int rm_roughness = image::load_image("resources/rm/rm_roughness.png");
-	//int rm_normal = image::load_image("resources/rm/rm_normal.png");
+	//int cube_id = mesh::load_mesh("resources/mesh/cube.obj");
+	//int icosphere_id = mesh::load_mesh("resources/mesh/icosphere.obj");
+	//int spellbook_id = mesh::load_mesh("resources/mesh/spellbook.obj");
+
 
 	int p_albedo = image::load_image("resources/p/p_albedo.png");
 	int p_normal = image::load_image("resources/p/p_normal.png");
@@ -65,6 +68,11 @@ void	PT::init()
 	int mt_roughness = image::load_image("resources/mt/mt_roughness.png");
 	int mt_normal = image::load_image("resources/mt/mt_normal.png");
 
+	//int s_albedo = image::load_image("resources/s/s_albedo.png");
+	//int s_metalness = image::load_image("resources/s/s_metalness.png");
+	//int s_roughness = image::load_image("resources/s/s_roughness.png");
+	//int s_normal = image::load_image("resources/s/s_normal.png");
+
 
 
 	//this->obj.push_back(new sphere(make_float3(0.0f, 0.0f, 0.0f),		make_float3(0.0f, -0.55f, 0.0f), 0.75f,	rm_albedo, rm_metalness, rm_roughness, rm_normal,	make_float2(1.5f, 1.0f),	make_float3(0.0f, 0.0f, 0.0f), 0.0f));
@@ -72,17 +80,20 @@ void	PT::init()
 
 	this->obj.push_back(new sphere(make_float3(-1.5f, -0.25f, 0.25f),	make_float3(0.0f, 0.0f, 0.0f), 0.5f,	mt_albedo, mt_metalness, mt_roughness, mt_normal,	make_float2(1.75f, 1.0f),	make_float3(0.0f, 0.0f, 0.0f), 0.0f));
 
-	//this->obj.push_back(new sphere(make_float3(-1.0f, 1.0f, -1.0f),	make_float3(0.0f, 0.0f, 0.0f), 0.1f,	make_float3(1.0f, 1.0f, 1.0f),		0.7f, 0.2f,									make_float3(1.0f, 1.0f, 1.0f), 10.0f));
-	this->obj.push_back(new sphere(make_float3(-1.0f, -0.65f, -1.0f),	make_float3(0.0f, 0.0f, 0.0f), 0.1f,	make_float3(1.0f, 1.0f, 1.0f),		0.7f, 0.2f,									make_float3(0.96f, 0.96f, 0.06f), 1.0f));
+	this->obj.push_back(new sphere(make_float3(-1.0f, 1.0f, -1.0f),		make_float3(0.0f, 0.0f, 0.0f), 0.1f,	make_float3(1.0f, 1.0f, 1.0f),		0.7f, 0.2f,									make_float3(1.0f, 1.0f, 1.0f), 10.0f));
+	//this->obj.push_back(new sphere(make_float3(-1.0f, -0.65f, -1.0f),	make_float3(0.0f, 0.0f, 0.0f), 0.1f,	make_float3(1.0f, 1.0f, 1.0f),		0.7f, 0.2f,									make_float3(0.96f, 0.96f, 0.06f), 1.0f));
 
-	this->obj.push_back(new sphere(make_float3(1.0f, -0.65f, -1.0f),	make_float3(0.0f, 0.0f, 0.0f), 0.1f,	make_float3(1.0f, 1.0f, 1.0f),		0.7f, 0.2f,									make_float3(0.06f, 0.54f, 0.96f), 1.0f));
+	//this->obj.push_back(new sphere(make_float3(1.0f, -0.65f, -1.0f),	make_float3(0.0f, 0.0f, 0.0f), 0.1f,	make_float3(1.0f, 1.0f, 1.0f),		0.7f, 0.2f,									make_float3(0.06f, 0.54f, 0.96f), 1.0f));
 
-	this->obj.push_back(new plane(make_float3(0.0f, -0.75f, 5.0f),		make_float3(0.0f, 1.0f, 0.0f),			make_float3(1.0f, 1.0f, 1.0f),		0.1f, 1.0f,									make_float3(0.0f, 0.0f, 0.0f)));
-	this->obj.push_back(new plane(make_float3(0.0f, 9.25f, 5.0f),		make_float3(0.0f, 1.0f, 0.0f),			make_float3(1.0f, 1.0f, 0.0f),		0.1f, 1.0f,									make_float3(0.0f, 0.0f, 0.0f)));
-	this->obj.push_back(new plane(make_float3(0.0f, 0.0f, -5.0f),		make_float3(0.0f, 0.0f, 1.0f),			make_float3(1.0f, 1.0f, 1.0f),		0.1f, 1.0f,									make_float3(0.0f, 0.0f, 0.0f)));
-	this->obj.push_back(new plane(make_float3(0.0f, 0.0f, 5.0f),		make_float3(0.0f, 0.0f, -1.0f),			make_float3(1.0f, 1.0f, 1.0f),		0.1f, 1.0f,									make_float3(0.0f, 0.0f, 0.0f)));
-	this->obj.push_back(new plane(make_float3(-3.0, 0.0f, 0.0f),		make_float3(1.0f, 0.0f, 0.0f),			make_float3(0.05f, 1.0f, 0.05f),	0.1f, 1.0f,									make_float3(0.0f, 0.0f, 0.0f)));
-	this->obj.push_back(new plane(make_float3(3.0, 0.0f, 0.0f),			make_float3(-1.0f, 0.0f, 0.0f),			make_float3(1.0f, 0.05f, 0.05f),	0.1f, 1.0f,									make_float3(0.0f, 0.0f, 0.0f)));
+	this->obj.push_back(new plane(make_float3(0.0f, -0.75f, 5.0f),		make_float3(0.0f, 1.0f, 0.0f),			make_float3(1.0f, 1.0f, 1.0f),		0.1f, 1.0f));
+	this->obj.push_back(new plane(make_float3(0.0f, 9.25f, 5.0f),		make_float3(0.0f, 1.0f, 0.0f),			make_float3(1.0f, 1.0f, 0.0f),		0.1f, 1.0f));
+	this->obj.push_back(new plane(make_float3(0.0f, 0.0f, -5.0f),		make_float3(0.0f, 0.0f, 1.0f),			make_float3(1.0f, 1.0f, 1.0f),		0.1f, 1.0f));
+	this->obj.push_back(new plane(make_float3(0.0f, 0.0f, 5.0f),		make_float3(0.0f, 0.0f, -1.0f),			make_float3(1.0f, 1.0f, 1.0f),		0.1f, 1.0f));
+	this->obj.push_back(new plane(make_float3(-3.0, 0.0f, 0.0f),		make_float3(1.0f, 0.0f, 0.0f),			make_float3(0.05f, 1.0f, 0.05f),	0.1f, 1.0f));
+	this->obj.push_back(new plane(make_float3(3.0, 0.0f, 0.0f),			make_float3(-1.0f, 0.0f, 0.0f),			make_float3(1.0f, 0.05f, 0.05f),	0.1f, 1.0f));
+
+	//mesh::create_mesh(icosphere_id, make_float3(0.0f, 0.0f, 0.0f), make_float3(0.0f, 0.0f, 0.0f), make_float3(0.75f, 0.75f, 0.75f), make_float3(1.0f, 0.05f, 1.0f), 1.0f, 0.15f, this->obj);
+	//mesh::create_mesh(spellbook_id, make_float3(0.0f, -0.55f, 0.0f), make_float3(0.0f, 1.3f, 0.0f), make_float3(0.2f, 0.2f, -0.2f), s_albedo, s_metalness, s_roughness, s_normal, this->obj);
 
 
 	int i = -1;

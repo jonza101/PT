@@ -56,15 +56,13 @@ __device__ float3	lerp(const float3 &a, const float3 &b, float factor)
 	return (vec);
 }
 
-__device__ float3	exp_f3(const float3 &a)
+__device__ float	distance(const float3 &a, const float3 &b)
 {
-	float3 rv;
-	
-	rv.x = expf(a.x);
-	rv.y = expf(a.y);
-	rv.z = expf(a.z);
+	float dx = a.x - b.x;
+	float dy = a.y - b.y;
+	float dz = a.z - b.z;
 
-	return (rv);
+	return (sqrtf(dx * dx + dy * dy + dz * dz));
 }
 
 
@@ -190,6 +188,45 @@ __device__ int		shadow_factor(const float3 &origin, const float3 &dir, float z_n
 				t = -1.0f + (fabs(denom) > EPSILON && tt > EPSILON) * (tt + 1.0f);
 				break;
 			}
+			case TRIANGLE:
+			{
+				float3 a = scene->obj[i].vert[0];
+				float3 b = scene->obj[i].vert[1];
+				float3 c = scene->obj[i].vert[2];
+
+				float3 e1, e2;
+				float3 tvec, qvec;
+
+				e1.x = b.x - a.x;
+				e1.y = b.y - a.y;
+				e1.z = b.z - a.z;
+				e2.x = c.x - a.x;
+				e2.y = c.y - a.y;
+				e2.z = c.z - a.z;
+
+				float3 pvec = cross(dir, e2);
+				float det = dot(e1, pvec);
+
+				if (det < EPSILON && det > -EPSILON)
+					break;
+
+				float inv_det = 1.0f / (float)det;
+				tvec.x = origin.x - a.x;
+				tvec.y = origin.y - a.y;
+				tvec.z = origin.z - a.z;
+				float u = dot(tvec, pvec) * inv_det;
+				if (u < 0.0f || u > 1.0f)
+					break;
+
+				qvec = cross(tvec, e1);
+				float v = dot(dir, qvec) * inv_det;
+				if (v < 0.0f || u + v > 1.0f)
+					break;
+
+				t = dot(e2, qvec) * inv_det;
+
+				break;
+			}
 		}
 
 		if (t >= z_near && t <= z_far)
@@ -200,6 +237,7 @@ __device__ int		shadow_factor(const float3 &origin, const float3 &dir, float z_n
 
 	return (1);
 }
+
 
 __device__ int		intersection(const float3 &origin, const float3 &dir, float z_near, float z_far, gpu_scene *scene, float &dist)
 {
@@ -238,6 +276,45 @@ __device__ int		intersection(const float3 &origin, const float3 &dir, float z_ne
 
 				float tt = (float)dot(oc, scene->obj[i].orientation) / (float)(!denom ? 1.0 : denom);
 				t = -1.0f + (fabs(denom) > EPSILON && tt > EPSILON) * (tt + 1.0f);
+
+				break;
+			}
+			case TRIANGLE:
+			{
+				float3 a = scene->obj[i].vert[0];
+				float3 b = scene->obj[i].vert[1];
+				float3 c = scene->obj[i].vert[2];
+
+				float3 e1, e2;
+				float3 tvec, qvec;
+
+				e1.x = b.x - a.x;
+				e1.y = b.y - a.y;
+				e1.z = b.z - a.z;
+				e2.x = c.x - a.x;
+				e2.y = c.y - a.y;
+				e2.z = c.z - a.z;
+
+				float3 pvec = cross(dir, e2);
+				float det = dot(e1, pvec);
+
+				if (det < EPSILON && det > -EPSILON)
+					break;
+
+				float inv_det = 1.0f / (float)det;
+				tvec.x = origin.x - a.x;
+				tvec.y = origin.y - a.y;
+				tvec.z = origin.z - a.z;
+				float u = dot(tvec, pvec) * inv_det;
+				if (u < 0.0f || u > 1.0f)
+					break;
+
+				qvec = cross(tvec, e1);
+				float v = dot(dir, qvec) * inv_det;
+				if (v < 0.0f || u + v > 1.0f)
+					break;
+
+				t = dot(e2, qvec) * inv_det;
 
 				break;
 			}
@@ -285,7 +362,7 @@ __device__ float3	tex_2d(const float2 &uv, gpu_tex *g_tex, int tex_id)
 	return (color);
 }
 
-__device__ float2	generate_uv(const float3 &point, const float3 &normal, gpu_scene *scene, gpu_tex *g_tex, int obj_id)
+__device__ float2	generate_uv(const float3 &point, const float3 &normal, const float3 &barycentric, gpu_scene *scene, gpu_tex *g_tex, int obj_id)
 {
 	float2 uv = make_float2(0.0f, 0.0f);
 	switch (scene->obj[obj_id].type)
@@ -320,6 +397,23 @@ __device__ float2	generate_uv(const float3 &point, const float3 &normal, gpu_sce
 
 			uv.x = fmodf(fabsf((0.5f + (float)atan2f(r_normal.z, r_normal.x) / (float)(2.0f * M_PI)) * uv_scale.x), 1.0f);
 			uv.y = fmodf(fabsf((0.5f - (float)asinf(r_normal.y) / (float)M_PI) * uv_scale.y), 1.0f);
+
+			break;
+		}
+		case TRIANGLE:
+		{
+			float3 a = scene->obj[obj_id].vert[0];
+			float3 b = scene->obj[obj_id].vert[1];
+			float3 c = scene->obj[obj_id].vert[2];
+
+			float2 a_uv = scene->obj[obj_id].uv[0];
+			float2 b_uv = scene->obj[obj_id].uv[1];
+			float2 c_uv = scene->obj[obj_id].uv[2];
+
+			uv.x = barycentric.x * a_uv.x + barycentric.y * b_uv.x + barycentric.z * c_uv.x;
+			uv.y = barycentric.x * a_uv.y + barycentric.y * b_uv.y + barycentric.z * c_uv.y;
+
+			break;
 		}
 	}
 
@@ -400,8 +494,6 @@ __device__ float3	fresnel_schlick(float cost, const float3 &f0)
 
 	return (f);
 }
-
-
 
 __device__ float3	estimate_direct(float3 &point, float3 &normal, gpu_scene *scene, curandState *curand_state, int hit_obj_id, const float3 &view_dir, const float3 &albedo, float roughness, float metalness)
 {
@@ -539,10 +631,11 @@ __device__ float3	trace(float3 &origin, float3 &dir, float z_near, float z_far, 
 
 	float3 point;
 	float3 normal;
+	float3 barycentric;
 
 
 	int b = -1;
-	while (++b < MAX_BOUNCES)
+	while (++b < MAX_BOUNCES)	//	MAX_BOUNCES
 	{
 		float dist;
 		int hit_obj_id = intersection(curr_origin, curr_dir, z_near, z_far, scene, dist);
@@ -575,6 +668,7 @@ __device__ float3	trace(float3 &origin, float3 &dir, float z_near, float z_far, 
 					normal.x = (float)(point.x - scene->obj[hit_obj_id].pos.x) / (float)scene->obj[hit_obj_id].radius;
 					normal.y = (float)(point.y - scene->obj[hit_obj_id].pos.y) / (float)scene->obj[hit_obj_id].radius;
 					normal.z = (float)(point.z - scene->obj[hit_obj_id].pos.z) / (float)scene->obj[hit_obj_id].radius;
+
 					break;
 				}
 				case PLANE:
@@ -583,6 +677,46 @@ __device__ float3	trace(float3 &origin, float3 &dir, float z_near, float z_far, 
 					normal.x = -scene->obj[hit_obj_id].orientation.x * cost + scene->obj[hit_obj_id].orientation.x * !cost;
 					normal.y = -scene->obj[hit_obj_id].orientation.y * cost + scene->obj[hit_obj_id].orientation.y * !cost;
 					normal.z = -scene->obj[hit_obj_id].orientation.z * cost + scene->obj[hit_obj_id].orientation.z * !cost;
+
+					break;
+				}
+				case TRIANGLE:
+				{
+					float3 a = scene->obj[hit_obj_id].vert[0];
+					float3 b = scene->obj[hit_obj_id].vert[1];
+					float3 c = scene->obj[hit_obj_id].vert[2];
+
+					float3 a_n = scene->obj[hit_obj_id].norm[0];
+					float3 b_n = scene->obj[hit_obj_id].norm[1];
+					float3 c_n = scene->obj[hit_obj_id].norm[2];
+
+					float3 v0, v1, v2;
+					v0.x = b.x - a.x;
+					v0.y = b.y - a.y;
+					v0.z = b.z - a.z;
+					v1.x = c.x - a.x;
+					v1.y = c.y - a.y;
+					v1.z = c.z - a.z;
+					v2.x = point.x - a.x;
+					v2.y = point.y - a.y;
+					v2.z = point.z - a.z;
+
+					float d00 = dot(v0, v0);
+					float d01 = dot(v0, v1);
+					float d11 = dot(v1, v1);
+					float d20 = dot(v2, v0);
+					float d21 = dot(v2, v1);
+					float denom = d00 * d11 - d01 * d01;
+
+					barycentric.y = (float)(d11 * d20 - d01 * d21) / (float)denom;
+					barycentric.z = (float)(d00 * d21 - d01 * d20) / (float)denom;
+					barycentric.x = 1.0f - barycentric.y - barycentric.z;
+
+					normal.x = barycentric.x * a_n.x + barycentric.y * b_n.x + barycentric.z * c_n.x;
+					normal.y = barycentric.x * a_n.y + barycentric.y * b_n.y + barycentric.z * c_n.y;
+					normal.z = barycentric.x * a_n.z + barycentric.y * b_n.z + barycentric.z * c_n.z;
+					normal = normalize(normal);
+
 					break;
 				}
 			}
@@ -598,7 +732,7 @@ __device__ float3	trace(float3 &origin, float3 &dir, float z_near, float z_far, 
 			int normal_id = scene->obj[hit_obj_id].normal_id;
 
 			if (albedo_id >= 0 || metalness_id >= 0 || roughness_id >= 0 || normal_id >= 0)
-				uv = generate_uv(point, normal, scene, g_tex, hit_obj_id);
+				uv = generate_uv(point, normal, barycentric, scene, g_tex, hit_obj_id);
 
 			if (albedo_id >= 0)
 				albedo = tex_2d(uv, g_tex, albedo_id);
@@ -687,26 +821,6 @@ __global__ void		d_render(int *data, int2 win_wh, curandState *curand_state, gpu
 
 	float fx = (float)x / (float)win_wh.x * 2.0f - 1.0f;
 	float fy = (float)y / (float)win_wh.y * 2.0f - 1.0f;
-
-	/*float cx = (float)x / (float)win_wh.x * 2.0f - 1.0f;
-	float cy = (float)y / (float)win_wh.y * 2.0f - 1.0f;
-
-	float pix_w = 1.0f / (float)win_wh.x;
-	float pix_h = 1.0f / (float)win_wh.y;
-
-
-	float3 dir = cam->forward;
-	float x_dir_factor = cam->scale * cam->aspect_ratio * cx;
-	dir.x += cam->right.x * x_dir_factor;
-	dir.y += cam->right.y * x_dir_factor;
-	dir.z += cam->right.z * x_dir_factor;
-
-	float y_dir_factor = cam->scale * cy;
-	dir.x += cam->up.x * y_dir_factor;
-	dir.y += cam->up.y * y_dir_factor;
-	dir.z += cam->up.z * y_dir_factor;
-	dir = normalize(dir);*/
-
 
 	float3 clr;
 	clr.x = 0.0f;

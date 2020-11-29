@@ -20,12 +20,16 @@
 #include <vector>
 
 
+#include "matrix.h"
+
 #include "camera.h"
 #include "gpu_scene.h"
 #include "image.h"
 
 #include "sphere.h"
 #include "plane.h"
+#include "triangle.h"
+#include "mesh.h"
 
 
 #define EPSILON 0.000001f

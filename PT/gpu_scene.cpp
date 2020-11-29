@@ -58,6 +58,7 @@ void	PT::malloc_gpu_scene()
 	this->h_cam = (gpu_cam*)malloc(sizeof(gpu_cam));
 	if ((this->cuda_status = cudaMallocManaged(&this->d_cam, sizeof(gpu_cam))) != cudaSuccess)
 		std::cout << "d_cam cudaMallocManaged error " << this->cuda_status << ": " << cudaGetErrorName(this->cuda_status) << '\n';
+	this->cpy_gpu_camera();
 
 
 	this->d_tex = image::d_malloc(this->h_tex, this->cuda_status);

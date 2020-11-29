@@ -39,6 +39,10 @@ struct				d_obj_data
 	float3			pos;
 	float3			orientation;
 
+	float3			vert[3];
+	float3			norm[3];
+	float2			uv[3];
+
 	float3			emission;
 
 	int				albedo_id;

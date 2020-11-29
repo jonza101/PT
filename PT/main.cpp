@@ -19,7 +19,7 @@ void	PT::update()
 {
 	SDL_Event sdl_event;
 
-	Uint32 start = SDL_GetTicks();
+	Uint32 start_ticks = SDL_GetTicks();
 
 	bool is_running = 1;
 	while (is_running)
@@ -33,7 +33,7 @@ void	PT::update()
 			}
 		}
 
-		this->cpy_gpu_camera();
+		//this->cpy_gpu_camera();
 		this->render();
 
 		SDL_UpdateTexture(this->txt, 0, this->h_data, this->win_wh.x * sizeof(int));
@@ -41,9 +41,9 @@ void	PT::update()
 		SDL_RenderPresent(this->ren);
 
 
-		Uint32 temp = SDL_GetTicks();
-		std::cout << temp - start << " ms\n";
-		start = temp;
+		Uint32 curr_ticks = SDL_GetTicks();
+		std::cout << curr_ticks - start_ticks << " ms\n";
+		start_ticks = curr_ticks;
 
 		/*this->screenshot("screenshots/pt_.png");
 		exit(0);*/
@@ -57,7 +57,7 @@ int		main()
 	TTF_Init();
 
 	PT *pt = new PT("PT", 1280, 720, SDL_WINDOW_SHOWN);
-	pt->create_camera(make_float3(0.0f, 0.0f, -3.0f), 70.0f, make_float3(0.0f, 0.0f, 1.0f), 0.001f, FLT_MAX);
+	pt->create_camera(make_float3(0.0f, 0.5f, -3.0f), 70.0f, make_float3(0.0f, -0.1f, 1.0f), 0.001f, FLT_MAX);
 
 	pt->init();
 	pt->update();
