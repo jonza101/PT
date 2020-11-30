@@ -36,6 +36,19 @@ void	PT::malloc_gpu_scene()
 		std::cout << "h_scene cudaMallocManaged error " << this->cuda_status << ": " << cudaGetErrorName(this->cuda_status) << '\n';
 
 
+	this->h_scene->env_map_status = image::get_env_map_status();
+	if (this->h_scene->env_map_status)
+	{
+		if ((this->cuda_status = cudaMallocManaged(&this->h_scene->env_map, sizeof(int) * 6)) != cudaSuccess)
+			std::cout << "h_scene cudaMallocManaged error " << this->cuda_status << ": " << cudaGetErrorName(this->cuda_status) << '\n';
+
+		int *env_map = image::get_env_map();
+		int i = -1;
+		while (++i < 6)
+			this->h_scene->env_map[i] = env_map[i];
+	}
+
+
 	int l = 0;
 	int i = -1;
 	while (++i < obj_count)

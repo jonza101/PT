@@ -67,4 +67,7 @@ struct				gpu_scene
 
 	int				light_count;
 	d_light_data	*light;
+
+	int				env_map_status;
+	int				*env_map;
 };

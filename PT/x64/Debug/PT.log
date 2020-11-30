@@ -1,39 +1,39 @@
-﻿  Compiling CUDA source file render.cu...
-  Compiling CUDA source file init_gpu_kernel.cu...
-  
-  D:\vs_project\PT\PT>"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.1\bin\nvcc.exe" -gencode=arch=compute_52,code=\"sm_52,compute_52\" --use-local-env -ccbin "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.16.27023\bin\HostX86\x64" -x cu   -I./SDL_inc -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.1\include" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.1\include"  -G   --keep-dir x64\Debug -maxrregcount=0  --machine 64 --compile -cudart static  -g   -DWIN32 -DWIN64 -D_DEBUG -D_CONSOLE -D_MBCS -Xcompiler "/EHsc /W3 /nologo /Od /Fdx64\Debug\vc141.pdb /FS /Zi /RTC1 /MDd " -o x64\Debug\render.cu.obj "D:\vs_project\PT\PT\render.cu" 
+﻿  Compiling CUDA source file init_gpu_kernel.cu...
+  Compiling CUDA source file render.cu...
   
   D:\vs_project\PT\PT>"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.1\bin\nvcc.exe" -gencode=arch=compute_52,code=\"sm_52,compute_52\" --use-local-env -ccbin "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.16.27023\bin\HostX86\x64" -x cu   -I./SDL_inc -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.1\include" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.1\include"  -G   --keep-dir x64\Debug -maxrregcount=0  --machine 64 --compile -cudart static  -g   -DWIN32 -DWIN64 -D_DEBUG -D_CONSOLE -D_MBCS -Xcompiler "/EHsc /W3 /nologo /Od /Fdx64\Debug\vc141.pdb /FS /Zi /RTC1 /MDd " -o x64\Debug\init_gpu_kernel.cu.obj "D:\vs_project\PT\PT\init_gpu_kernel.cu" 
+  
+  D:\vs_project\PT\PT>"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.1\bin\nvcc.exe" -gencode=arch=compute_52,code=\"sm_52,compute_52\" --use-local-env -ccbin "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.16.27023\bin\HostX86\x64" -x cu   -I./SDL_inc -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.1\include" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.1\include"  -G   --keep-dir x64\Debug -maxrregcount=0  --machine 64 --compile -cudart static  -g   -DWIN32 -DWIN64 -D_DEBUG -D_CONSOLE -D_MBCS -Xcompiler "/EHsc /W3 /nologo /Od /Fdx64\Debug\vc141.pdb /FS /Zi /RTC1 /MDd " -o x64\Debug\render.cu.obj "D:\vs_project\PT\PT\render.cu" 
 d:\vs_project\pt\pt\mesh.h(138): warning : label "mesh" was declared but never referenced
   
-D:/vs_project/PT/PT/render.cu(403): warning : variable "a" was declared but never referenced
-  
-D:/vs_project/PT/PT/render.cu(404): warning : variable "b" was declared but never referenced
-  
-D:/vs_project/PT/PT/render.cu(405): warning : variable "c" was declared but never referenced
-  
-D:/vs_project/PT/PT/render.cu(534): warning : variable "pdf" was declared but never referenced
-  
 d:\vs_project\pt\pt\mesh.h(138): warning : label "mesh" was declared but never referenced
+  
+D:/vs_project/PT/PT/render.cu(410): warning : variable "a" was declared but never referenced
+  
+D:/vs_project/PT/PT/render.cu(411): warning : variable "b" was declared but never referenced
+  
+D:/vs_project/PT/PT/render.cu(412): warning : variable "c" was declared but never referenced
+  
+D:/vs_project/PT/PT/render.cu(543): warning : variable "pdf" was declared but never referenced
   
   init_gpu_kernel.cu
   render.cu
-d:\vs_project\pt\pt\image.h(89): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
+d:\vs_project\pt\pt\image.h(120): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
 d:\vs_project\pt\pt\mesh.h(138): warning C4102: 'mesh': unreferenced label
 d:\vs_project\pt\pt\pt.h(66): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
 D:/vs_project/PT/PT/init_gpu_kernel.cu(20): warning C4244: '=': conversion from 'float' to 'unsigned int', possible loss of data
 D:/vs_project/PT/PT/init_gpu_kernel.cu(21): warning C4244: '=': conversion from 'float' to 'unsigned int', possible loss of data
-d:\vs_project\pt\pt\image.h(89): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
+d:\vs_project\pt\pt\image.h(120): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
 d:\vs_project\pt\pt\mesh.h(138): warning C4102: 'mesh': unreferenced label
 d:\vs_project\pt\pt\pt.h(66): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
   gpu_scene.cpp
-d:\vs_project\pt\pt\image.h(89): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
+d:\vs_project\pt\pt\image.h(120): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
 d:\vs_project\pt\pt\mesh.h(138): warning C4102: 'mesh': unreferenced label
 d:\vs_project\pt\pt\pt.h(66): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
 d:\vs_project\pt\pt\gpu_scene.cpp(28): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
 d:\vs_project\pt\pt\gpu_scene.cpp(33): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
   init.cpp
-d:\vs_project\pt\pt\image.h(89): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
+d:\vs_project\pt\pt\image.h(120): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
 d:\vs_project\pt\pt\mesh.h(138): warning C4102: 'mesh': unreferenced label
 d:\vs_project\pt\pt\pt.h(66): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
 d:\vs_project\pt\pt\init.cpp(10): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
@@ -42,12 +42,10 @@ d:\vs_project\pt\pt\init.cpp(11): warning C4101: 'max_stack_size': unreferenced 
 d:\vs_project\pt\pt\init.cpp(27): warning C4244: '=': conversion from 'float' to 'unsigned int', possible loss of data
 d:\vs_project\pt\pt\init.cpp(28): warning C4244: '=': conversion from 'float' to 'unsigned int', possible loss of data
   main.cpp
-d:\vs_project\pt\pt\image.h(89): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
+d:\vs_project\pt\pt\image.h(120): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
 d:\vs_project\pt\pt\mesh.h(138): warning C4102: 'mesh': unreferenced label
 d:\vs_project\pt\pt\pt.h(66): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
   sphere.cpp
   triangle.cpp
-  vec_math.cpp
   Generating Code...
-     Creating library D:\vs_project\PT\x64\Debug\PT.lib and object D:\vs_project\PT\x64\Debug\PT.exp
   PT.vcxproj -> D:\vs_project\PT\x64\Debug\PT.exe

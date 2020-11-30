@@ -44,6 +44,9 @@ private:
 	static std::vector<image_data>	images;
 	static size_t					pix;
 
+	static int						env_map_status;
+	static int						env_map[6];
+
 public:
 	static int						load_image(const char *file_path)
 	{
@@ -73,6 +76,34 @@ public:
 
 		return (img_id);
 	}
+
+	static void						set_env_map(int neg_x, int pos_x, int neg_y, int pos_y, int neg_z, int pos_z)
+	{
+		if (neg_x < 0 || neg_x >= image::images.size() || pos_x < 0 || pos_x >= image::images.size()
+				|| neg_y < 0 || neg_y >= image::images.size() || pos_y < 0 || pos_y >= image::images.size()
+				|| neg_z < 0 || neg_z >= image::images.size() || pos_z < 0 || pos_z >= image::images.size())
+			return;
+
+		image::env_map_status = 1;
+
+		image::env_map[0] = pos_x;
+		image::env_map[1] = neg_x;
+		image::env_map[2] = pos_y;
+		image::env_map[3] = neg_y;
+		image::env_map[4] = pos_z;
+		image::env_map[5] = neg_z;
+	}
+
+	static int						get_env_map_status()
+	{
+		return (image::env_map_status);
+	}
+
+	static int						*get_env_map()
+	{
+		return (image::env_map);
+	}
+
 
 	static const image_data			*get_image_data(int img_id)
 	{

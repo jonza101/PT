@@ -42,12 +42,14 @@ void	PT::gpu_init()
 }
 
 
-int image::id_iter = 0;
-std::vector<image_data>	image::images;
-size_t image::pix = 0;
+int							image::id_iter = 0;
+std::vector<image_data>		image::images;
+size_t						image::pix = 0;
+int							image::env_map_status = 0;
+int							image::env_map[6];
 
-int mesh::id_iter = 0;
-std::vector<mesh_data> mesh::meshes;
+int							mesh::id_iter = 0;
+std::vector<mesh_data>		mesh::meshes;
 
 
 void	PT::init()
@@ -58,6 +60,16 @@ void	PT::init()
 	//int cube_id = mesh::load_mesh("resources/mesh/cube.obj");
 	//int icosphere_id = mesh::load_mesh("resources/mesh/icosphere.obj");
 	//int spellbook_id = mesh::load_mesh("resources/mesh/spellbook.obj");
+	//int quad_id = mesh::load_mesh("resources/mesh/quad.obj");
+
+
+	//int nx = image::load_image("resources/cubemap/gamrig/nx.png");
+	//int ny = image::load_image("resources/cubemap/gamrig/ny.png");
+	//int nz = image::load_image("resources/cubemap/gamrig/nz.png");
+	//int px = image::load_image("resources/cubemap/gamrig/px.png");
+	//int py = image::load_image("resources/cubemap/gamrig/py.png");
+	//int pz = image::load_image("resources/cubemap/gamrig/pz.png");
+	//image::set_env_map(nx, px, ny, py, nz, pz);
 
 
 	int p_albedo = image::load_image("resources/p/p_albedo.png");
@@ -85,6 +97,7 @@ void	PT::init()
 
 	//this->obj.push_back(new sphere(make_float3(1.0f, -0.65f, -1.0f),	make_float3(0.0f, 0.0f, 0.0f), 0.1f,	make_float3(1.0f, 1.0f, 1.0f),		0.7f, 0.2f,									make_float3(0.06f, 0.54f, 0.96f), 1.0f));
 
+
 	this->obj.push_back(new plane(make_float3(0.0f, -0.75f, 5.0f),		make_float3(0.0f, 1.0f, 0.0f),			make_float3(1.0f, 1.0f, 1.0f),		0.1f, 1.0f));
 	this->obj.push_back(new plane(make_float3(0.0f, 9.25f, 5.0f),		make_float3(0.0f, 1.0f, 0.0f),			make_float3(1.0f, 1.0f, 0.0f),		0.1f, 1.0f));
 	this->obj.push_back(new plane(make_float3(0.0f, 0.0f, -5.0f),		make_float3(0.0f, 0.0f, 1.0f),			make_float3(1.0f, 1.0f, 1.0f),		0.1f, 1.0f));
@@ -94,6 +107,7 @@ void	PT::init()
 
 	//mesh::create_mesh(icosphere_id, make_float3(0.0f, 0.0f, 0.0f), make_float3(0.0f, 0.0f, 0.0f), make_float3(0.75f, 0.75f, 0.75f), make_float3(1.0f, 0.05f, 1.0f), 1.0f, 0.15f, this->obj);
 	//mesh::create_mesh(spellbook_id, make_float3(0.0f, -0.55f, 0.0f), make_float3(0.0f, 1.3f, 0.0f), make_float3(0.2f, 0.2f, -0.2f), s_albedo, s_metalness, s_roughness, s_normal, this->obj);
+	//mesh::create_mesh(quad_id, make_float3(0.0f, -0.75f, 0.0f), make_float3(0.0f, 0.0f, 0.0f), make_float3(3.0f, 2.0f, 2.0f), make_float3(1.0f, 1.0f, 1.0f), 0.01f, 1.0f, this->obj);
 
 
 	int i = -1;

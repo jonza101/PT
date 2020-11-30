@@ -148,6 +148,120 @@ __device__ float3	sample_brdf(const float3 &normal, curandState *curand_state, f
 }
 
 
+__device__ float3	vec_rotate(const float3 &v, const float3 &k, float theta)
+{
+	float cost = cosf(theta);
+	float sint = sinf(theta);
+	float3 c = cross(k, v);
+	float k_dot_v = dot(k, v);
+
+	float3 r;
+	r.x = (v.x * cost) + (c.x * sint) + (k.x * k_dot_v) * (1.0f - cost);
+	r.y = (v.y * cost) + (c.y * sint) + (k.y * k_dot_v) * (1.0f - cost);
+	r.z = (v.z * cost) + (c.z * sint) + (k.z * k_dot_v) * (1.0f - cost);
+
+	return (r);
+}
+
+
+__device__ float3	tex_2d(const float2 &uv, gpu_tex *g_tex, int tex_id)
+{
+	float3 color;
+
+	int tx = uv.x * g_tex->wh[tex_id].x;
+	int ty = uv.y * g_tex->wh[tex_id].y;
+	int hex_color = g_tex->data[g_tex->offset[tex_id] + ty * g_tex->wh[tex_id].x + tx];
+
+	color.x = (float)((hex_color >> 16) & 0xFF) / (float)255.0f;
+	color.y = (float)((hex_color >> 8) & 0xFF) / (float)255.0f;
+	color.z = (float)(hex_color & 0xFF) / (float)255.0f;
+
+	return (color);
+}
+
+__device__ float3	tex_cube(const float3 &d, gpu_tex *g_tex, gpu_scene *scene)
+{
+	float3 color;
+
+	float abs_x = fabsf(d.x);
+	float abs_y = fabsf(d.y);
+	float abs_z = fabsf(d.z);
+	float sc, tc, ma;
+	
+	int idx;
+	float2 uv;
+
+	if (abs_x >= abs_y && abs_x >= abs_z)
+	{
+		if (d.x > 0.0f)
+		{
+			idx = 0;
+			sc = -d.z;
+			tc = -d.y;
+			ma = abs_x;
+
+		}
+		else
+		{
+			idx = 1;
+			sc = d.z;
+			tc = -d.y;
+			ma = abs_x;
+
+		}
+	}
+	if (abs_y >= abs_x && abs_y >= abs_z)
+	{
+		if (d.y > 0.0f)
+		{
+			idx = 2;
+			sc = d.x;
+			tc = d.z;
+			ma = abs_y;
+
+		}
+		else
+		{
+			idx = 3;
+			sc = d.x;
+			tc = -d.z;
+			ma = abs_y;
+		}
+	}
+	if (abs_z >= abs_x && abs_z >= abs_y)
+	{
+		if (d.z > 0.0f)
+		{
+			idx = 4;
+			sc = d.x;
+			tc = -d.y;
+			ma = abs_z;
+
+		}
+		else
+		{
+			idx = 5;
+			sc = -d.x;
+			tc = -d.y;
+			ma = abs_z;
+		}
+	}
+
+	if (ma == 0.0f)
+	{
+		uv.x = 0.0f;
+		uv.y = 0.0f;
+	}
+	else
+	{
+		uv.x = ((float)sc / (float)ma + 1.0f) * 0.5f;
+		uv.y = ((float)tc / (float)ma + 1.0f) * 0.5f;
+	}
+
+	return (tex_2d(uv, g_tex, scene->env_map[idx]));
+}
+
+
 
 __device__ int		shadow_factor(const float3 &origin, const float3 &dir, float z_near, float z_far, gpu_scene *scene, int light_id)
 {
@@ -237,7 +351,6 @@ __device__ int		shadow_factor(const float3 &origin, const float3 &dir, float z_n
 
 	return (1);
 }
-
 
 __device__ int		intersection(const float3 &origin, const float3 &dir, float z_near, float z_far, gpu_scene *scene, float &dist)
 {
@@ -330,37 +443,6 @@ __device__ int		intersection(const float3 &origin, const float3 &dir, float z_ne
 	return (obj_id);
 }
 
-
-
-__device__ float3	vec_rotate(const float3 &v, const float3 &k, float theta)
-{
-	float cost = cosf(theta);
-	float sint = sinf(theta);
-	float3 c = cross(k, v);
-	float k_dot_v = dot(k, v);
-
-	float3 r;
-	r.x = (v.x * cost) + (c.x * sint) + (k.x * k_dot_v) * (1.0f - cost);
-	r.y = (v.y * cost) + (c.y * sint) + (k.y * k_dot_v) * (1.0f - cost);
-	r.z = (v.z * cost) + (c.z * sint) + (k.z * k_dot_v) * (1.0f - cost);
-
-	return (r);
-}
-
-__device__ float3	tex_2d(const float2 &uv, gpu_tex *g_tex, int tex_id)
-{
-	float3 color;
-
-	int tx = uv.x * g_tex->wh[tex_id].x;
-	int ty = uv.y * g_tex->wh[tex_id].y;
-	int hex_color = g_tex->data[g_tex->offset[tex_id] + ty * g_tex->wh[tex_id].x + tx];
-
-	color.x = (float)((hex_color >> 16) & 0xFF) / (float)255.0f;
-	color.y = (float)((hex_color >> 8) & 0xFF) / (float)255.0f;
-	color.z = (float)(hex_color & 0xFF) / (float)255.0f;
-
-	return (color);
-}
 
 __device__ float2	generate_uv(const float3 &point, const float3 &normal, const float3 &barycentric, gpu_scene *scene, gpu_tex *g_tex, int obj_id)
 {
@@ -793,7 +875,18 @@ __device__ float3	trace(float3 &origin, float3 &dir, float z_near, float z_far, 
 			}
 		}
 		else
+		{
+			if (scene->env_map_status)
+			{
+				float3 ray = make_float3(curr_dir.x, curr_dir.y, curr_dir.z);
+				float3 env_color = tex_cube(ray, g_tex, scene);
+
+				color.x += env_color.x * throughput.x;
+				color.y += env_color.y * throughput.y;
+				color.z += env_color.z * throughput.z;
+			}
 			break;
+		}	
 	}
 
 	color.x = powf((float)color.x / (color.x + 1.0f), HDR_CONST);
