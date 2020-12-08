@@ -78,19 +78,23 @@ public:
 		delete this->h_data;
 	}
 
-	void	init();
-	void	gpu_init();
-	void	init_gpu_kernel();
+	void					init();
+	void					gpu_init();
+	void					init_gpu_kernel();
 
-	void	update();
+	void					update();
 
-	void	malloc_gpu_scene();
-	void	cpy_gpu_camera();
+	void					malloc_gpu_scene();
+	void					cpy_gpu_camera();
 
-	void	render();
+	void					render();
 
 
-	void	screenshot(const char *file_path);
+	SDL_Surface				*get_surf_from_pixels(void *data, int w, int h);
+
+	void					merge_imgs();
+	void					rma_convert();
+	void					screenshot(const char *file_path);
 
 private:
 	SDL_Window				*win;

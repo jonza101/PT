@@ -17,7 +17,7 @@ __device__ float	dot(const float3 &a, const float3 &b)
 __device__ float3	cross(const float3 &a, const float3 &b)
 {
 	float3 vec;
-	
+
 	vec.x = a.y * b.z - a.z * b.y;
 	vec.y = a.z * b.x - a.x * b.z;
 	vec.z = a.x * b.y - a.y * b.x;
@@ -187,7 +187,7 @@ __device__ float3	tex_cube(const float3 &d, gpu_tex *g_tex, gpu_scene *scene)
 	float abs_y = fabsf(d.y);
 	float abs_z = fabsf(d.z);
 	float sc, tc, ma;
-	
+
 	int idx;
 	float2 uv;
 
@@ -495,6 +495,11 @@ __device__ float2	generate_uv(const float3 &point, const float3 &normal, const f
 			uv.x = barycentric.x * a_uv.x + barycentric.y * b_uv.x + barycentric.z * c_uv.x;
 			uv.y = barycentric.x * a_uv.y + barycentric.y * b_uv.y + barycentric.z * c_uv.y;
 
+			//uv.x = fminf(1.0f, fmaxf(0.0f, uv.x));
+			//uv.y = fminf(1.0f, fmaxf(0.0f, uv.y));
+			uv.x = fmodf(uv.x, 1.0f);
+			uv.y = fmodf(uv.y, 1.0f);
+
 			break;
 		}
 	}
@@ -513,7 +518,7 @@ __device__ float3	normal_map(const float3 &normal, const float2 &uv, gpu_tex *g_
 		t = cross(normal, make_float3(0.0f, 0.0f, 1.0f));
 	t = normalize(t);
 	float3 b = normalize(cross(normal, t));
-	
+
 	float3 map_n = tex_2d(uv, g_tex, tex_id);
 	map_n.x = map_n.x * 2.0f - 1.0f;
 	map_n.y = map_n.y * 2.0f - 1.0f;
@@ -705,7 +710,7 @@ __device__ float3	trace(float3 &origin, float3 &dir, float z_near, float z_far, 
 	color.x = 0.0f;
 	color.y = 0.0f;
 	color.z = 0.0f;
-	
+
 	float3 throughput;
 	throughput.x = 1.0f;
 	throughput.y = 1.0f;
@@ -832,7 +837,7 @@ __device__ float3	trace(float3 &origin, float3 &dir, float z_near, float z_far, 
 			float3 refl_ray = reflect(curr_dir, normal);
 			float3 hemi_sample = sample_brdf(normal, curand_state, roughness);
 			curr_dir = lerp(refl_ray, hemi_sample, roughness);
-			
+
 
 			cost = fmaxf(EPSILON, dot(normal, curr_dir));
 			pdf = lerp(1.0f, PDF_CONST, roughness);
@@ -861,7 +866,7 @@ __device__ float3	trace(float3 &origin, float3 &dir, float z_near, float z_far, 
 			throughput.x *= (float)cost / (float)pdf * brdf.x;
 			throughput.y *= (float)cost / (float)pdf * brdf.y;
 			throughput.z *= (float)cost / (float)pdf * brdf.z;
-			
+
 
 			if (b >= 3)
 			{
@@ -959,12 +964,13 @@ void	PT::render()
 	this->d_grid_size.y = ceilf(float(this->win_wh.y) / (float)this->d_block_size.y);*/
 
 
-	d_render<<<this->d_grid_size, this->d_block_size>>>(this->d_data, this->win_wh, this->curand_state, this->d_scene, this->d_cam, this->d_tex, 32);
+	int ns = 64;
+	d_render<<<this->d_grid_size, this->d_block_size>>>(this->d_data, this->win_wh, this->curand_state, this->d_scene, this->d_cam, this->d_tex, ns);
 	if ((this->cuda_status = cudaDeviceSynchronize()) != cudaSuccess)
-		std::cout << "cudaDeviceSynchronize error " << this->cuda_status << ": " << cudaGetErrorName(this->cuda_status) << ' ' << cudaGetErrorString(this->cuda_status) << '\n';
+	std::cout << "cudaDeviceSynchronize error " << this->cuda_status << ": " << cudaGetErrorName(this->cuda_status) << ' ' << cudaGetErrorString(this->cuda_status) << '\n';
 
 	if ((this->cuda_status = cudaGetLastError()) != cudaSuccess)
-		std::cout << "cudaDeviceSynchronize error " << this->cuda_status << ": " << cudaGetErrorName(this->cuda_status) << ' ' << cudaGetErrorString(this->cuda_status) << '\n';
+	std::cout << "cudaDeviceSynchronize error " << this->cuda_status << ": " << cudaGetErrorName(this->cuda_status) << ' ' << cudaGetErrorString(this->cuda_status) << '\n';
 
 	if ((this->cuda_status = cudaMemcpy(this->h_data, this->d_data, sizeof(int) * this->win_wh.x * this->win_wh.y, cudaMemcpyDeviceToHost)) != cudaSuccess)
 		std::cout << "h_data cudaMemcpy error " << this->cuda_status << ": " << cudaGetErrorName(this->cuda_status) << ' ' << cudaGetErrorString(this->cuda_status) << '\n';
