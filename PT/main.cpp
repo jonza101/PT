@@ -136,7 +136,7 @@ void	PT::update()
 		std::cout << curr_ticks - start_ticks << " ms\n";
 		start_ticks = curr_ticks;
 
-		this->screenshot("screenshots/pt__3.png");
+		this->screenshot("screenshots/pt__test.png");
 		exit(0);
 	}
 }
@@ -148,8 +148,8 @@ int		main()
 	TTF_Init();
 
 	PT *pt = new PT("PT", 1920, 1080, SDL_WINDOW_HIDDEN);//SDL_WINDOW_SHOWN);
-	pt->create_camera(make_float3(3.203f, 2.515f, 2.397f), 75.0f, make_float3(-0.7f, -0.2f, -0.7f), 0.001f, FLT_MAX);
-	//pt->create_camera(make_float3(0.0, 3.0f, 10.0f), 70.0f, make_float3(0.0f, 0.0f, -1.0f), 0.001f, FLT_MAX);
+	//pt->create_camera(make_float3(3.203f, 2.515f, 2.397f), 75.0f, make_float3(-0.7f, -0.2f, -0.7f), 0.001f, FLT_MAX);
+	pt->create_camera(make_float3(0.0f, 0.0f, -3.0f), 70.0f, make_float3(0.0f, 0.0f, 1.0f), 0.001f, FLT_MAX);
 
 	pt->init();
 	pt->update();

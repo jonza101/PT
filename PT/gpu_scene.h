@@ -24,11 +24,14 @@ struct				gpu_cam
 
 struct				d_light_data
 {
+	int				type;
 	int				obj_id;
 
-	float3			pos;
 	float3			emission;
 	float			intensity;
+
+	float3			dir;
+	float			dir_factor;
 };
 
 struct				d_obj_data
@@ -68,6 +71,7 @@ struct				gpu_scene
 	int				light_count;
 	d_light_data	*light;
 
+	float3			background_color;
 	int				env_map_status;
 	int				*env_map;
 };

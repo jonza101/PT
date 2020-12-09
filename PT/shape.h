@@ -42,16 +42,6 @@ public:
 
 
 	virtual void	d_malloc(gpu_scene *h_scene, const int id, cudaError_t &cuda_status) = 0;
-
-
-	void			d_malloc_light(gpu_scene *h_scene, const int obj_id, const int light_id, cudaError_t &cuda_status)
-	{
-		h_scene->light[light_id].obj_id = obj_id;
-
-		h_scene->light[light_id].pos = this->pos;
-		h_scene->light[light_id].emission = this->emission;
-		h_scene->light[light_id].intensity = this->intensity;
-	}
 };
 
 

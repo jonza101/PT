@@ -1,10 +1,15 @@
-﻿  main.cpp
+﻿  init.cpp
 d:\vs_project\pt\pt\image.h(120): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
 d:\vs_project\pt\pt\mesh.h(138): warning C4102: 'mesh': unreferenced label
-d:\vs_project\pt\pt\pt.h(66): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+d:\vs_project\pt\pt\pt.h(68): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+d:\vs_project\pt\pt\init.cpp(10): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+d:\vs_project\pt\pt\init.cpp(10): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
+d:\vs_project\pt\pt\init.cpp(11): warning C4101: 'max_stack_size': unreferenced local variable
+d:\vs_project\pt\pt\init.cpp(27): warning C4244: '=': conversion from 'float' to 'unsigned int', possible loss of data
+d:\vs_project\pt\pt\init.cpp(28): warning C4244: '=': conversion from 'float' to 'unsigned int', possible loss of data
      Creating library D:\vs_project\PT\x64\Release\PT.lib and object D:\vs_project\PT\x64\Release\PT.exp
   Generating code
-  1 of 221 functions ( 0.5%) were compiled, the rest were copied from previous compilation.
+  2 of 765 functions ( 0.3%) were compiled, the rest were copied from previous compilation.
     0 functions were new in current compilation
     1 functions had inline decision re-evaluated but remain unchanged
   Finished generating code

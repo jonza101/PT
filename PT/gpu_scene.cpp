@@ -21,8 +21,24 @@ void	PT::cpy_gpu_camera()
 		std::cout << "d_cam cudaMemcpy error " << this->cuda_status << ": " << cudaGetErrorName(this->cuda_status) << '\n';
 }
 
+
+void	PT::create_lights()
+{
+	int i = -1;
+	while (++i < this->obj.size())
+	{
+		if (this->obj[i]->is_light)
+		{
+			this->lights.push_back(new light(this->obj[i]->emission, this->obj[i]->intensity, i));
+		}
+	}
+}
+
 void	PT::malloc_gpu_scene()
 {
+	this->create_lights();
+
+
 	this->h_scene = (gpu_scene*)malloc(sizeof(gpu_scene));
 
 	int obj_count = this->obj.size();
@@ -30,12 +46,13 @@ void	PT::malloc_gpu_scene()
 	if ((this->cuda_status = cudaMallocManaged(&this->h_scene->obj, sizeof(d_obj_data) * obj_count)) != cudaSuccess)
 		std::cout << "h_scene cudaMallocManaged error " << this->cuda_status << ": " << cudaGetErrorName(this->cuda_status) << '\n';
 
-	int light_count = this->light.size();
+	int light_count = this->lights.size();
 	this->h_scene->light_count = light_count;
 	if ((this->cuda_status = cudaMallocManaged(&this->h_scene->light, sizeof(d_light_data) * light_count)) != cudaSuccess)
 		std::cout << "h_scene cudaMallocManaged error " << this->cuda_status << ": " << cudaGetErrorName(this->cuda_status) << '\n';
 
 
+	this->h_scene->background_color = this->background_color;
 	this->h_scene->env_map_status = image::get_env_map_status();
 	if (this->h_scene->env_map_status)
 	{
@@ -49,16 +66,15 @@ void	PT::malloc_gpu_scene()
 	}
 
 
-	int l = 0;
 	int i = -1;
 	while (++i < obj_count)
 	{
 		this->obj[i]->d_malloc(this->h_scene, i, this->cuda_status);
-		if (this->obj[i]->is_light)
-		{
-			this->obj[i]->d_malloc_light(this->h_scene, i, l, this->cuda_status);
-			l++;
-		}
+	}
+	i = -1;
+	while (++i < light_count)
+	{
+		this->lights[i]->d_malloc(this->h_scene, i, this->cuda_status);
 	}
 
 

@@ -26,6 +26,8 @@
 #include "gpu_scene.h"
 #include "image.h"
 
+#include "light.h"
+
 #include "sphere.h"
 #include "plane.h"
 #include "triangle.h"
@@ -84,6 +86,7 @@ public:
 
 	void					update();
 
+	void					create_lights();
 	void					malloc_gpu_scene();
 	void					cpy_gpu_camera();
 
@@ -112,7 +115,8 @@ private:
 	float					scale;
 
 	std::vector<shape*>		obj;
-	std::vector<shape*>		light;
+	std::vector<light*>		lights;
+	float3					background_color = make_float3(0.0f, 0.0f, 0.0f);
 
 
 	cudaError_t				cuda_status;

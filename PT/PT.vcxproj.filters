@@ -71,6 +71,9 @@
     <ClInclude Include="matrix.h">
       <Filter>inc</Filter>
     </ClInclude>
+    <ClInclude Include="light.h">
+      <Filter>inc</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CudaCompile Include="render.cu">

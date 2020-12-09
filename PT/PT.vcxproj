@@ -95,6 +95,7 @@
     <ClInclude Include="camera.h" />
     <ClInclude Include="gpu_scene.h" />
     <ClInclude Include="image.h" />
+    <ClInclude Include="light.h" />
     <ClInclude Include="matrix.h" />
     <ClInclude Include="mesh.h" />
     <ClInclude Include="plane.h" />

@@ -599,30 +599,51 @@ __device__ float3	estimate_direct(float3 &point, float3 &normal, gpu_scene *scen
 	float3 light_dir, halfway_dir;
 	float3 sample_point, sample_dir;
 
+	int l_id;
+	float l_radius, l_dist, l_area;
+	float attenuation;
+	float3 radiance;
+
 	int l = -1;
 	while (++l < scene->light_count)
 	{
-		int l_id = scene->light[l].obj_id;
-		float l_radius = scene->obj[l_id].radius;
+		int l_type = scene->light[l].type;
 
-		light_dir.x = scene->obj[l_id].pos.x - point.x;
-		light_dir.y = scene->obj[l_id].pos.y - point.y;
-		light_dir.z = scene->obj[l_id].pos.z - point.z;
-		float l_dist = sqrtf(light_dir.x * light_dir.x + light_dir.y * light_dir.y + light_dir.z * light_dir.z) - l_radius;
-		l_dist = fmaxf(l_dist, EPSILON);
-		float l_dist_sqrt = sqrtf(l_dist);
-		light_dir = normalize(light_dir);
+		l_area = 1.0f;
+		attenuation = 1.0f;
 
-		halfway_dir.x = view_dir.x + light_dir.x;
-		halfway_dir.y = view_dir.y + light_dir.y;
-		halfway_dir.z = view_dir.z + light_dir.z;
-		halfway_dir = normalize(halfway_dir);
+		switch (l_type)
+		{
+			case SPHERICAL:
+			{
+				l_id = scene->light[l].obj_id;
+				l_radius = scene->obj[l_id].radius;
 
-		float cost = fmaxf(0.0f, dot(normal, light_dir));
-		float l_area = 4.0f * M_PI * l_dist_sqrt;
-		l_area = fmaxf(l_area, EPSILON);
+				light_dir.x = scene->obj[l_id].pos.x - point.x;
+				light_dir.y = scene->obj[l_id].pos.y - point.y;
+				light_dir.z = scene->obj[l_id].pos.z - point.z;
+				l_dist = sqrtf(light_dir.x * light_dir.x + light_dir.y * light_dir.y + light_dir.z * light_dir.z) - l_radius;
+				l_dist = fmaxf(l_dist, EPSILON);
+				float l_dist_sqrt = sqrtf(l_dist);
+				light_dir = normalize(light_dir);
 
-		float pdf = 0.0f;
+				l_area = 4.0f * M_PI * l_dist_sqrt;
+				l_area = fmaxf(l_area, EPSILON);
+				attenuation = 1.0f / (float)(l_dist * l_dist);
+
+				break;
+			}
+			case DIRECTIONAL:
+			{
+				float3 l_dir = scene->light[l].dir;
+				light_dir.x = -l_dir.x;
+				light_dir.y = -l_dir.y;
+				light_dir.z = -l_dir.z;
+				l_dist = FLT_MAX;
+
+				break;
+			}
+		}
 
 
 		int shadow_samples = 1;
@@ -633,33 +654,82 @@ __device__ float3	estimate_direct(float3 &point, float3 &normal, gpu_scene *scen
 			float r1 = curand_uniform(*&curand_state);
 			float r2 = curand_uniform(*&curand_state);
 
-			float theta = 2.0f * M_PI * r1;
-			float phi = M_PI * r2;
+			switch (l_type)
+			{
+				case SPHERICAL:
+				{
 
-			float x = sinf(theta) * cosf(phi) * scene->obj[l_id].radius + scene->obj[l_id].pos.x;
-			float y = sinf(theta) * sinf(phi) * scene->obj[l_id].radius + scene->obj[l_id].pos.y;
-			float z = cosf(theta) * scene->obj[l_id].radius + scene->obj[l_id].pos.z;
+					float theta = 2.0f * M_PI * r1;
+					float phi = M_PI * r2;
 
-			sample_point.x = x;
-			sample_point.y = y;
-			sample_point.z = z;
+					float x = sinf(theta) * cosf(phi) * scene->obj[l_id].radius + scene->obj[l_id].pos.x;
+					float y = sinf(theta) * sinf(phi) * scene->obj[l_id].radius + scene->obj[l_id].pos.y;
+					float z = cosf(theta) * scene->obj[l_id].radius + scene->obj[l_id].pos.z;
 
-			sample_dir.x = sample_point.x - point.x;
-			sample_dir.y = sample_point.y - point.y;
-			sample_dir.z = sample_point.z - point.z;
-			sample_dir = normalize(sample_dir);
+					sample_point.x = x;
+					sample_point.y = y;
+					sample_point.z = z;
 
-			sh_hit += shadow_factor(point, sample_dir, EPSILON * 100.0f, l_dist, scene, l);
+					sample_dir.x = sample_point.x - point.x;
+					sample_dir.y = sample_point.y - point.y;
+					sample_dir.z = sample_point.z - point.z;
+					sample_dir = normalize(sample_dir);
+
+					break;
+				}
+				case DIRECTIONAL:
+				{
+					float dir_factor = scene->light[l].dir_factor;
+
+					float theta = atanf(dir_factor * sqrtf(1.0f - r1 * r1));
+					float phi = 2.0f * M_PI * r2;
+
+					float x = theta * cosf(phi);
+					float y = r1;
+					float z = theta * sinf(phi);
+
+					float3 t, b;
+					t.x = 0.0f;
+					t.y = -light_dir.z;
+					t.z = light_dir.y;
+					if (fabs(light_dir.x) > fabs(light_dir.y))
+					{
+						t.x = light_dir.z;
+						t.y = 0.0f;
+						t.z = -light_dir.x;
+					}
+
+					t = normalize(t);
+					b = cross(light_dir, t);
+
+					float3 rand_dir;
+					rand_dir.x = x * b.x + y * light_dir.x + z * t.x;
+					rand_dir.y = x * b.y + y * light_dir.y + z * t.y;
+					rand_dir.z = x * b.z + y * light_dir.z + z * t.z;
+					rand_dir = normalize(rand_dir);
+
+					sample_dir = lerp(light_dir, rand_dir, dir_factor);
+					sample_dir = normalize(sample_dir);
+
+					break;
+				}
+			}
+
+			sh_hit += shadow_factor(point, sample_dir, EPSILON * 10.0f, l_dist, scene, l);
 		}
 		float sh_factor = (float)sh_hit / (float)shadow_samples;
 
 
-		float attenuation = 1.0f / (float)(l_dist * l_dist);
-		float3 radiance;
 		radiance.x = scene->light[l].emission.x * attenuation / (float)l_area * scene->light[l].intensity;
 		radiance.y = scene->light[l].emission.y * attenuation / (float)l_area * scene->light[l].intensity;
 		radiance.z = scene->light[l].emission.z * attenuation / (float)l_area * scene->light[l].intensity;
 
+
+		halfway_dir.x = view_dir.x + light_dir.x;
+		halfway_dir.y = view_dir.y + light_dir.y;
+		halfway_dir.z = view_dir.z + light_dir.z;
+		halfway_dir = normalize(halfway_dir);
+		float cost = fmaxf(0.0f, dot(normal, light_dir));
 
 		float d = distr_trowbridge_reitz_ggx(normal, halfway_dir, roughness);
 		float g = geom_smith(normal, view_dir, light_dir, roughness);
@@ -881,15 +951,16 @@ __device__ float3	trace(float3 &origin, float3 &dir, float z_near, float z_far, 
 		}
 		else
 		{
+			float3 env_color = scene->background_color;
 			if (scene->env_map_status)
 			{
 				float3 ray = make_float3(curr_dir.x, curr_dir.y, curr_dir.z);
-				float3 env_color = tex_cube(ray, g_tex, scene);
-
-				color.x += env_color.x * throughput.x;
-				color.y += env_color.y * throughput.y;
-				color.z += env_color.z * throughput.z;
+				env_color = tex_cube(ray, g_tex, scene);
 			}
+			color.x += env_color.x * throughput.x;
+			color.y += env_color.y * throughput.y;
+			color.z += env_color.z * throughput.z;
+
 			break;
 		}	
 	}
@@ -964,7 +1035,7 @@ void	PT::render()
 	this->d_grid_size.y = ceilf(float(this->win_wh.y) / (float)this->d_block_size.y);*/
 
 
-	int ns = 64;
+	int ns = 1024;
 	d_render<<<this->d_grid_size, this->d_block_size>>>(this->d_data, this->win_wh, this->curand_state, this->d_scene, this->d_cam, this->d_tex, ns);
 	if ((this->cuda_status = cudaDeviceSynchronize()) != cudaSuccess)
 	std::cout << "cudaDeviceSynchronize error " << this->cuda_status << ": " << cudaGetErrorName(this->cuda_status) << ' ' << cudaGetErrorString(this->cuda_status) << '\n';
