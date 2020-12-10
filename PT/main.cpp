@@ -149,7 +149,7 @@ int		main()
 
 	PT *pt = new PT("PT", 1920, 1080, SDL_WINDOW_HIDDEN);//SDL_WINDOW_SHOWN);
 	//pt->create_camera(make_float3(3.203f, 2.515f, 2.397f), 75.0f, make_float3(-0.7f, -0.2f, -0.7f), 0.001f, FLT_MAX);
-	pt->create_camera(make_float3(0.0f, 0.0f, -3.0f), 70.0f, make_float3(0.0f, 0.0f, 1.0f), 0.001f, FLT_MAX);
+	pt->create_camera(make_float3(0.7906947f, -0.07525006f, -1.091486f), 70.0f, make_float3(-0.6f, 0.0f, 0.8f), EPSILON, FLT_MAX);
 
 	pt->init();
 	pt->update();

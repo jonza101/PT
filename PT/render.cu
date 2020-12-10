@@ -715,7 +715,7 @@ __device__ float3	estimate_direct(float3 &point, float3 &normal, gpu_scene *scen
 				}
 			}
 
-			sh_hit += shadow_factor(point, sample_dir, EPSILON * 10.0f, l_dist, scene, l);
+			sh_hit += shadow_factor(point, sample_dir, EPSILON, l_dist, scene, l);
 		}
 		float sh_factor = (float)sh_hit / (float)shadow_samples;
 
@@ -1035,7 +1035,7 @@ void	PT::render()
 	this->d_grid_size.y = ceilf(float(this->win_wh.y) / (float)this->d_block_size.y);*/
 
 
-	int ns = 1024;
+	int ns = 32;
 	d_render<<<this->d_grid_size, this->d_block_size>>>(this->d_data, this->win_wh, this->curand_state, this->d_scene, this->d_cam, this->d_tex, ns);
 	if ((this->cuda_status = cudaDeviceSynchronize()) != cudaSuccess)
 	std::cout << "cudaDeviceSynchronize error " << this->cuda_status << ": " << cudaGetErrorName(this->cuda_status) << ' ' << cudaGetErrorString(this->cuda_status) << '\n';
