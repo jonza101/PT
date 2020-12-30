@@ -582,7 +582,7 @@ __device__ float3	fresnel_schlick(float cost, const float3 &f0)
 	return (f);
 }
 
-__device__ float3	estimate_direct(float3 &point, float3 &normal, gpu_scene *scene, curandState *curand_state, int hit_obj_id, const float3 &view_dir, const float3 &albedo, float roughness, float metalness)
+__device__ float3	estimate_direct(float3 &point, float3 &normal, gpu_scene *scene, gpu_tex *g_tex, curandState *curand_state, int hit_obj_id, const float3 &view_dir, const float3 &albedo, float roughness, float metalness)
 {
 	float3 lo;
 	lo.x = 0.0f;
@@ -596,12 +596,13 @@ __device__ float3	estimate_direct(float3 &point, float3 &normal, gpu_scene *scen
 	f0 = lerp(f0, albedo, metalness);
 
 
-	float3 light_dir, halfway_dir;
+	float3 light_dir, halfway_dir, light_pos;
 	float3 sample_point, sample_dir;
 
 	int l_id;
 	float l_radius, l_dist, l_area;
 	float attenuation;
+	float3 emission;
 	float3 radiance;
 
 	int l = -1;
@@ -618,10 +619,14 @@ __device__ float3	estimate_direct(float3 &point, float3 &normal, gpu_scene *scen
 			{
 				l_id = scene->light[l].obj_id;
 				l_radius = scene->obj[l_id].radius;
+				if (l_id == hit_obj_id)
+					continue;
 
-				light_dir.x = scene->obj[l_id].pos.x - point.x;
-				light_dir.y = scene->obj[l_id].pos.y - point.y;
-				light_dir.z = scene->obj[l_id].pos.z - point.z;
+				light_pos = scene->obj[l_id].pos;
+
+				light_dir.x = light_pos.x - point.x;
+				light_dir.y = light_pos.y - point.y;
+				light_dir.z = light_pos.z - point.z;
 				l_dist = sqrtf(light_dir.x * light_dir.x + light_dir.y * light_dir.y + light_dir.z * light_dir.z) - l_radius;
 				l_dist = fmaxf(l_dist, EPSILON);
 				float l_dist_sqrt = sqrtf(l_dist);
@@ -630,6 +635,7 @@ __device__ float3	estimate_direct(float3 &point, float3 &normal, gpu_scene *scen
 				l_area = 4.0f * M_PI * l_dist_sqrt;
 				l_area = fmaxf(l_area, EPSILON);
 				attenuation = 1.0f / (float)(l_dist * l_dist);
+				emission = scene->obj[l_id].albedo;
 
 				break;
 			}
@@ -641,88 +647,99 @@ __device__ float3	estimate_direct(float3 &point, float3 &normal, gpu_scene *scen
 				light_dir.z = -l_dir.z;
 				l_dist = FLT_MAX;
 
+				emission = scene->light[l].albedo;
+
 				break;
 			}
 		}
 
-
-		int shadow_samples = 1;
-		int sh_hit = 0;
-		int s = -1;
-		while (++s < shadow_samples)
+		float r1 = curand_uniform(*&curand_state);
+		float r2 = curand_uniform(*&curand_state);
+		switch (l_type)
 		{
-			float r1 = curand_uniform(*&curand_state);
-			float r2 = curand_uniform(*&curand_state);
-
-			switch (l_type)
+			case SPHERICAL:
 			{
-				case SPHERICAL:
+				float3 point_dir;
+				point_dir.x = -light_dir.x;
+				point_dir.y = -light_dir.y;
+				point_dir.z = -light_dir.z;
+
+				float3 hemi_dir = sample_brdf(point_dir, curand_state, 1.0f);
+				sample_point.x = light_pos.x + hemi_dir.x * l_radius;
+				sample_point.y = light_pos.y + hemi_dir.y * l_radius;
+				sample_point.z = light_pos.z + hemi_dir.z * l_radius;
+
+				sample_dir.x = sample_point.x - point.x;
+				sample_dir.y = sample_point.y - point.y;
+				sample_dir.z = sample_point.z - point.z;
+				sample_dir = normalize(sample_dir);
+
+
+				if (scene->obj[l_id].albedo_id >= 0)
 				{
+					float2 uv = generate_uv(sample_point, hemi_dir, make_float3(0.0f, 0.0f, 0.0f), scene, g_tex, hit_obj_id);
+					emission = tex_2d(uv, g_tex, scene->obj[l_id].albedo_id);
 
-					float theta = 2.0f * M_PI * r1;
-					float phi = M_PI * r2;
+					float l_roughness = scene->obj[l_id].roughness;
+					if (scene->obj[l_id].roughness_id >= 0)
+						l_roughness = tex_2d(uv, g_tex, scene->obj[l_id].roughness_id).x;
 
-					float x = sinf(theta) * cosf(phi) * scene->obj[l_id].radius + scene->obj[l_id].pos.x;
-					float y = sinf(theta) * sinf(phi) * scene->obj[l_id].radius + scene->obj[l_id].pos.y;
-					float z = cosf(theta) * scene->obj[l_id].radius + scene->obj[l_id].pos.z;
-
-					sample_point.x = x;
-					sample_point.y = y;
-					sample_point.z = z;
-
-					sample_dir.x = sample_point.x - point.x;
-					sample_dir.y = sample_point.y - point.y;
-					sample_dir.z = sample_point.z - point.z;
-					sample_dir = normalize(sample_dir);
-
-					break;
+					emission.x *= (1.0f - l_roughness);
+					emission.y *= (1.0f - l_roughness);
+					emission.z *= (1.0f - l_roughness);
 				}
-				case DIRECTIONAL:
-				{
-					float dir_factor = scene->light[l].dir_factor;
 
-					float theta = atanf(dir_factor * sqrtf(1.0f - r1 * r1));
-					float phi = 2.0f * M_PI * r2;
-
-					float x = theta * cosf(phi);
-					float y = r1;
-					float z = theta * sinf(phi);
-
-					float3 t, b;
-					t.x = 0.0f;
-					t.y = -light_dir.z;
-					t.z = light_dir.y;
-					if (fabs(light_dir.x) > fabs(light_dir.y))
-					{
-						t.x = light_dir.z;
-						t.y = 0.0f;
-						t.z = -light_dir.x;
-					}
-
-					t = normalize(t);
-					b = cross(light_dir, t);
-
-					float3 rand_dir;
-					rand_dir.x = x * b.x + y * light_dir.x + z * t.x;
-					rand_dir.y = x * b.y + y * light_dir.y + z * t.y;
-					rand_dir.z = x * b.z + y * light_dir.z + z * t.z;
-					rand_dir = normalize(rand_dir);
-
-					sample_dir = lerp(light_dir, rand_dir, dir_factor);
-					sample_dir = normalize(sample_dir);
-
-					break;
-				}
+				break;
 			}
+			case DIRECTIONAL:
+			{
+				float dir_factor = scene->light[l].dir_factor;
 
-			sh_hit += shadow_factor(point, sample_dir, EPSILON, l_dist, scene, l);
+				float theta = atanf(dir_factor * sqrtf(1.0f - r1 * r1));
+				float phi = 2.0f * M_PI * r2;
+
+				float x = theta * cosf(phi);
+				float y = r1;
+				float z = theta * sinf(phi);
+
+				float3 t, b;
+				t.x = 0.0f;
+				t.y = -light_dir.z;
+				t.z = light_dir.y;
+				if (fabs(light_dir.x) > fabs(light_dir.y))
+				{
+					t.x = light_dir.z;
+					t.y = 0.0f;
+					t.z = -light_dir.x;
+				}
+
+				t = normalize(t);
+				b = cross(light_dir, t);
+
+				float3 rand_dir;
+				rand_dir.x = x * b.x + y * light_dir.x + z * t.x;
+				rand_dir.y = x * b.y + y * light_dir.y + z * t.y;
+				rand_dir.z = x * b.z + y * light_dir.z + z * t.z;
+				rand_dir = normalize(rand_dir);
+
+				sample_dir = lerp(light_dir, rand_dir, dir_factor);
+				sample_dir = normalize(sample_dir);
+
+				break;
+			}
 		}
+
+		float sh_hit = shadow_factor(point, sample_dir, EPSILON, l_dist, scene, l);
 		float sh_factor = (float)sh_hit / (float)shadow_samples;
 
 
-		radiance.x = scene->light[l].emission.x * attenuation / (float)l_area * scene->light[l].intensity;
+		/*radiance.x = scene->light[l].emission.x * attenuation / (float)l_area * scene->light[l].intensity;
 		radiance.y = scene->light[l].emission.y * attenuation / (float)l_area * scene->light[l].intensity;
-		radiance.z = scene->light[l].emission.z * attenuation / (float)l_area * scene->light[l].intensity;
+		radiance.z = scene->light[l].emission.z * attenuation / (float)l_area * scene->light[l].intensity;*/
+
+		radiance.x = emission.x * attenuation / (float)l_area * scene->light[l].intensity;
+		radiance.y = emission.y * attenuation / (float)l_area * scene->light[l].intensity;
+		radiance.z = emission.z * attenuation / (float)l_area * scene->light[l].intensity;
 
 
 		halfway_dir.x = view_dir.x + light_dir.x;
@@ -798,14 +815,18 @@ __device__ float3	trace(float3 &origin, float3 &dir, float z_near, float z_far, 
 		int hit_obj_id = intersection(curr_origin, curr_dir, z_near, z_far, scene, dist);
 		if (hit_obj_id >= 0)
 		{
-			if (scene->obj[hit_obj_id].is_light)
+			/*if (scene->obj[hit_obj_id].is_light)
 			{
 				color.x += throughput.x * scene->obj[hit_obj_id].emission.x;
 				color.y += throughput.y * scene->obj[hit_obj_id].emission.y;
 				color.z += throughput.z * scene->obj[hit_obj_id].emission.z;
 
-				break;
-			}
+				color.x = fminf(1.0f, color.x);
+				color.y = fminf(1.0f, color.y);
+				color.z = fminf(1.0f, color.z);
+
+				return (color);
+			}*/
 
 
 			point.x = curr_origin.x + curr_dir.x * dist;
@@ -928,10 +949,10 @@ __device__ float3	trace(float3 &origin, float3 &dir, float z_near, float z_far, 
 			brdf.z = d_brdf.z + s_brdf.z;
 
 
-			float3 lo = estimate_direct(point, normal, scene, curand_state, hit_obj_id, view_dir, albedo, roughness, metalness);
-			color.x += throughput.x * lo.x;
-			color.y += throughput.y * lo.y;
-			color.z += throughput.z * lo.z;
+			float3 lo = estimate_direct(point, normal, scene, g_tex, curand_state, hit_obj_id, view_dir, albedo, roughness, metalness);
+			color.x += throughput.x * lo.x + (scene->obj[hit_obj_id].is_light ? albedo.x * (1.0f - roughness) : 0.0f);
+			color.y += throughput.y * lo.y + (scene->obj[hit_obj_id].is_light ? albedo.y * (1.0f - roughness) : 0.0f);
+			color.z += throughput.z * lo.z + (scene->obj[hit_obj_id].is_light ? albedo.z * (1.0f - roughness) : 0.0f);
 
 			throughput.x *= (float)cost / (float)pdf * brdf.x;
 			throughput.y *= (float)cost / (float)pdf * brdf.y;

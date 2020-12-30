@@ -36,8 +36,6 @@ public:
 	float			roughness;
 
 	float2			uv_scale;
-
-	float3			emission = make_float3(0.0f, 0.0f, 0.0f);
 	float			intensity;
 
 

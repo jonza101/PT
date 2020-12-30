@@ -84,13 +84,13 @@ void	PT::init()
 
 
 
-	this->obj.push_back(new sphere(make_float3(0.0f, 0.0f, 0.0f),		make_float3(0.0f, 0.0f, 0.0f), 0.75f,	p_albedo, 0.01f, 0.5f, p_normal,					make_float2(2.0f, 1.0f),	make_float3(0.0f, 0.0f, 0.0f), 0.0f));
-	this->obj.push_back(new sphere(make_float3(-1.5f, -0.25f, 0.25f),	make_float3(0.0f, 0.0f, 0.0f), 0.5f,	mt_albedo, mt_metalness, mt_roughness, mt_normal,	make_float2(1.75f, 1.0f),	make_float3(0.0f, 0.0f, 0.0f), 0.0f));
+	this->obj.push_back(new sphere(make_float3(0.0f, 0.0f, 0.0f),		make_float3(0.0f, 0.0f, 0.0f), 0.75f,	p_albedo, 0.01f, 0.5f, p_normal,					make_float2(2.0f, 1.0f)));
+	this->obj.push_back(new sphere(make_float3(-1.5f, -0.25f, 0.25f),	make_float3(0.0f, 0.0f, 0.0f), 0.5f,	mt_albedo, mt_metalness, mt_roughness, mt_normal,	make_float2(1.75f, 1.0f)));
 
-	//this->obj.push_back(new sphere(make_float3(-1.0f, 1.0f, -1.0f),		make_float3(0.0f, 0.0f, 0.0f), 0.1f,	make_float3(1.0f, 1.0f, 1.0f),		0.7f, 0.2f,									make_float3(1.0f, 1.0f, 1.0f), 10.0f));
-	//this->obj.push_back(new sphere(make_float3(-1.0f, -0.65f, -1.0f),	make_float3(0.0f, 0.0f, 0.0f), 0.1f,	make_float3(1.0f, 1.0f, 1.0f),		0.7f, 0.2f,									make_float3(0.96f, 0.96f, 0.06f), 1.0f));
-
-	//this->obj.push_back(new sphere(make_float3(1.0f, -0.65f, -1.0f),	make_float3(0.0f, 0.0f, 0.0f), 0.1f,	make_float3(1.0f, 1.0f, 1.0f),		0.7f, 0.2f,									make_float3(0.06f, 0.54f, 0.96f), 1.0f));
+	//this->obj.push_back(new sphere(make_float3(-1.0f, 1.0f, -1.0f),		make_float3(0.0f, 0.0f, 0.0f), 0.1f,	mt_albedo, mt_metalness, mt_roughness, mt_normal,	make_float2(4.0f, 2.0f),			1, 10.0f));
+	
+	//this->obj.push_back(new sphere(make_float3(1.0f, -0.65f, -1.0f),	make_float3(0.0f, 0.0f, 0.0f), 0.1f,	cg_albedo, 1.0f, cg_roughness, cg_normal,			make_float2(2.0f, 1.0f),			1, 2.0f));
+	//this->obj.push_back(new sphere(make_float3(-1.0f, -0.65f, -1.0f),	make_float3(0.0f, 0.0f, 0.0f), 0.1f,	cv_albedo, 1.0f, cv_roughness, cv_normal,			make_float2(2.0f, 1.0f),			1, 2.0f));
 
 	mesh::create_mesh(quad_id, make_float3(0.0f, -0.75f, 0.0f), make_float3(0.0f, 0.0f, 0.0f), make_float3(10.0f, 1.0f, 10.0f), make_float3(1.0f, 1.0f, 1.0f), 0.01f, 1.0f, this->obj);
 

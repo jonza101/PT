@@ -27,7 +27,7 @@ struct				d_light_data
 	int				type;
 	int				obj_id;
 
-	float3			emission;
+	float3			albedo;
 	float			intensity;
 
 	float3			dir;
@@ -45,8 +45,6 @@ struct				d_obj_data
 	float3			vert[3];
 	float3			norm[3];
 	float2			uv[3];
-
-	float3			emission;
 
 	int				albedo_id;
 	int				metalness_id;

@@ -18,27 +18,49 @@ public:
 	int			type;
 	int			obj_id = -1;
 
-	float3		emission;
+	//float3		emission;
 	float		intensity;
 
+	int			albedo_id = -1;
+	int			metalness_id = -1;
+	int			roughness_id = -1;
+	int			normal_id = -1;
+
+	float3		albedo;
+	float		metalness;
+	float		roughness;
+
+	float2		uv_scale;
+
+	//	DIR LIGHT
 	float3		dir;
 	float		dir_factor;
 
-
-	light(const float3 &emission, float intensity, int obj_id)
+public:
+	light(const float3 &albedo, int albedo_id, float metalness, int metalness_id, float roughness, int roughness_id, int normal_id, const float2 &uv_scale, float intensity, int obj_id)
 	{
 		this->type = SPHERICAL;
 		this->obj_id = obj_id;
 
-		this->emission = emission;
 		this->intensity = intensity;
+
+		this->albedo_id = albedo_id;
+		this->metalness_id = metalness_id;
+		this->roughness_id = roughness_id;
+		this->normal_id = normal_id;
+
+		this->albedo = albedo;
+		this->metalness = metalness;
+		this->roughness = roughness;
 	}
 
-	light(const float3 &emission, float intensity, const float3 &dir, float dir_factor)
+
+	//	DIR LIGHT
+	light(const float3 &albedo, float intensity, const float3 &dir, float dir_factor)
 	{
 		this->type = DIRECTIONAL;
 
-		this->emission = emission;
+		this->albedo = albedo;
 		this->intensity = intensity;
 
 		this->dir = h_normalize(dir);
@@ -51,7 +73,7 @@ public:
 		h_scene->light[light_id].type = this->type;
 		h_scene->light[light_id].obj_id = this->obj_id;
 
-		h_scene->light[light_id].emission = this->emission;
+		h_scene->light[light_id].albedo = this->albedo;
 		h_scene->light[light_id].intensity = this->intensity;
 
 		h_scene->light[light_id].dir = this->dir;

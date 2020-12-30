@@ -89,7 +89,7 @@ public:
 
 		h_scene->obj[id].orientation = this->orientation;
 
-		h_scene->obj[id].emission = this->emission;
+		//h_scene->obj[id].emission = this->emission;
 
 		h_scene->obj[id].albedo_id = this->albedo_id;
 		h_scene->obj[id].metalness_id = this->metalness_id;
