@@ -30,10 +30,12 @@ public:
 	int				metalness_id = -1;
 	int				roughness_id = -1;
 	int				normal_id = -1;
+	int				emissive_id = -1;
 
 	float3			albedo;
 	float			metalness;
 	float			roughness;
+	float			emissive = 0.0f;
 
 	float2			uv_scale;
 	float			intensity;
@@ -49,8 +51,10 @@ struct					mesh_material_data
 	int					metalness_id = -1;
 	int					roughness_id = -1;
 	int					normal_id = -1;
+	int					emissive_id = -1;
 
 	float3				albedo;
 	float				metalness;
 	float				roughness;
+	float				emissive;
 };

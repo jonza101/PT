@@ -679,14 +679,6 @@ __device__ float3	estimate_direct(float3 &point, float3 &normal, gpu_scene *scen
 				{
 					float2 uv = generate_uv(sample_point, hemi_dir, make_float3(0.0f, 0.0f, 0.0f), scene, g_tex, hit_obj_id);
 					emission = tex_2d(uv, g_tex, scene->obj[l_id].albedo_id);
-
-					float l_roughness = scene->obj[l_id].roughness;
-					if (scene->obj[l_id].roughness_id >= 0)
-						l_roughness = tex_2d(uv, g_tex, scene->obj[l_id].roughness_id).x;
-
-					emission.x *= (1.0f - l_roughness);
-					emission.y *= (1.0f - l_roughness);
-					emission.z *= (1.0f - l_roughness);
 				}
 
 				break;
@@ -730,7 +722,7 @@ __device__ float3	estimate_direct(float3 &point, float3 &normal, gpu_scene *scen
 		}
 
 		float sh_hit = shadow_factor(point, sample_dir, EPSILON, l_dist, scene, l);
-		float sh_factor = (float)sh_hit / (float)shadow_samples;
+		float sh_factor = (float)sh_hit;
 
 
 		/*radiance.x = scene->light[l].emission.x * attenuation / (float)l_area * scene->light[l].intensity;
@@ -903,13 +895,15 @@ __device__ float3	trace(float3 &origin, float3 &dir, float z_near, float z_far, 
 			float3 albedo = scene->obj[hit_obj_id].albedo;
 			float roughness = scene->obj[hit_obj_id].roughness;
 			float metalness = scene->obj[hit_obj_id].metalness;
+			float emissive = scene->obj[hit_obj_id].emissive;
 
 			int albedo_id = scene->obj[hit_obj_id].albedo_id;
 			int metalness_id = scene->obj[hit_obj_id].metalness_id;
 			int roughness_id = scene->obj[hit_obj_id].roughness_id;
 			int normal_id = scene->obj[hit_obj_id].normal_id;
+			int emissive_id = scene->obj[hit_obj_id].emissive_id;
 
-			if (albedo_id >= 0 || metalness_id >= 0 || roughness_id >= 0 || normal_id >= 0)
+			if (albedo_id >= 0 || metalness_id >= 0 || roughness_id >= 0 || normal_id >= 0 || emissive_id >= 0)
 				uv = generate_uv(point, normal, barycentric, scene, g_tex, hit_obj_id);
 
 			if (albedo_id >= 0)
@@ -920,6 +914,8 @@ __device__ float3	trace(float3 &origin, float3 &dir, float z_near, float z_far, 
 				roughness = tex_2d(uv, g_tex, roughness_id).x;
 			if (normal_id >= 0)
 				normal = normal_map(normal, uv, g_tex, normal_id);
+			if (emissive_id >= 0)
+				emissive = tex_2d(uv, g_tex, emissive_id).x * emissive;
 
 
 			float3 d_brdf, s_brdf, brdf;
@@ -949,14 +945,20 @@ __device__ float3	trace(float3 &origin, float3 &dir, float z_near, float z_far, 
 			brdf.z = d_brdf.z + s_brdf.z;
 
 
-			float3 lo = estimate_direct(point, normal, scene, g_tex, curand_state, hit_obj_id, view_dir, albedo, roughness, metalness);
-			color.x += throughput.x * lo.x + (scene->obj[hit_obj_id].is_light ? albedo.x * (1.0f - roughness) : 0.0f);
-			color.y += throughput.y * lo.y + (scene->obj[hit_obj_id].is_light ? albedo.y * (1.0f - roughness) : 0.0f);
-			color.z += throughput.z * lo.z + (scene->obj[hit_obj_id].is_light ? albedo.z * (1.0f - roughness) : 0.0f);
+			float3 emission = albedo;
+			emission.x *= emissive;
+			emission.y *= emissive;
+			emission.z *= emissive;
 
-			throughput.x *= (float)cost / (float)pdf * brdf.x;
-			throughput.y *= (float)cost / (float)pdf * brdf.y;
-			throughput.z *= (float)cost / (float)pdf * brdf.z;
+
+			float3 lo = estimate_direct(point, normal, scene, g_tex, curand_state, hit_obj_id, view_dir, albedo, roughness, metalness);
+			color.x += throughput.x * lo.x + emission.x;
+			color.y += throughput.y * lo.y + emission.y;
+			color.z += throughput.z * lo.z + emission.z;
+
+			throughput.x *= ((float)cost / (float)pdf * brdf.x + emission.x);
+			throughput.y *= ((float)cost / (float)pdf * brdf.y + emission.y);
+			throughput.z *= ((float)cost / (float)pdf * brdf.z + emission.z);
 
 
 			if (b >= 3)

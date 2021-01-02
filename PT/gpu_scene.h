@@ -50,12 +50,14 @@ struct				d_obj_data
 	int				metalness_id;
 	int				roughness_id;
 	int				normal_id;
+	int				emissive_id;
 
 	float2			uv_scale;
 
 	float3			albedo;
 	float			metalness;
 	float			roughness;
+	float			emissive;
 
 
 	float			radius;

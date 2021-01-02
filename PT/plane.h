@@ -27,17 +27,17 @@ public:
 		h_scene->obj[id].pos = this->pos;
 		h_scene->obj[id].orientation = this->orientation;
 
-		//h_scene->obj[id].emission = this->emission;
-
 		h_scene->obj[id].albedo_id = this->albedo_id;
 		h_scene->obj[id].metalness_id = this->metalness_id;
 		h_scene->obj[id].roughness_id = this->roughness_id;
 		h_scene->obj[id].normal_id = this->normal_id;
+		h_scene->obj[id].emissive_id = this->emissive_id;
 
 		h_scene->obj[id].uv_scale = this->uv_scale;
 
 		h_scene->obj[id].albedo = this->albedo;
 		h_scene->obj[id].metalness = this->metalness;
 		h_scene->obj[id].roughness = this->roughness;
+		h_scene->obj[id].emissive = this->emissive;
 	}
 };

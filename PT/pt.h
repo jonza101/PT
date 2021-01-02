@@ -40,6 +40,9 @@
 #define HDR_CONST (1.0f / 2.2f)
 
 
+#define EF 1
+
+
 
 class PT
 {

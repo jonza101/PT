@@ -58,7 +58,7 @@ void	PT::init()
 	this->gpu_init();
 
 
-	//int cube_id = mesh::load_mesh("resources/mesh/cube.obj");
+	int cube_id = mesh::load_mesh("resources/mesh/cube.obj");
 	int quad_id = mesh::load_mesh("resources/mesh/quad.obj");
 
 
@@ -84,16 +84,15 @@ void	PT::init()
 
 
 
-	this->obj.push_back(new sphere(make_float3(0.0f, 0.0f, 0.0f),		make_float3(0.0f, 0.0f, 0.0f), 0.75f,	p_albedo, 0.01f, 0.5f, p_normal,					make_float2(2.0f, 1.0f)));
-	this->obj.push_back(new sphere(make_float3(-1.5f, -0.25f, 0.25f),	make_float3(0.0f, 0.0f, 0.0f), 0.5f,	mt_albedo, mt_metalness, mt_roughness, mt_normal,	make_float2(1.75f, 1.0f)));
+	this->obj.push_back(new sphere(make_float3(0.0f, 0.0f, 0.0f),		make_float3(0.0f, 0.0f, 0.0f), 0.75f,	p_albedo, 0.01f, 0.5f, p_normal, mt_roughness, 1, 0.25f,								make_float2(2.0f, 1.0f)));
+	this->obj.push_back(new sphere(make_float3(-1.5f, -0.25f, 0.25f),	make_float3(0.0f, 0.0f, 0.0f), 0.5f,	mt_albedo, mt_metalness, mt_roughness, mt_normal, 0.0f,				make_float2(1.75f, 1.0f)));
 
-	//this->obj.push_back(new sphere(make_float3(-1.0f, 1.0f, -1.0f),		make_float3(0.0f, 0.0f, 0.0f), 0.1f,	mt_albedo, mt_metalness, mt_roughness, mt_normal,	make_float2(4.0f, 2.0f),			1, 10.0f));
+	//this->obj.push_back(new sphere(make_float3(-1.0f, 1.0f, -1.0f),		make_float3(0.0f, 0.0f, 0.0f), 0.1f,	mt_albedo, mt_metalness, mt_roughness, mt_normal, mt_metalness, EF, 1.0f,		make_float2(1.0f, 0.5f),			1, 10.0f));
 	
-	//this->obj.push_back(new sphere(make_float3(1.0f, -0.65f, -1.0f),	make_float3(0.0f, 0.0f, 0.0f), 0.1f,	cg_albedo, 1.0f, cg_roughness, cg_normal,			make_float2(2.0f, 1.0f),			1, 2.0f));
-	//this->obj.push_back(new sphere(make_float3(-1.0f, -0.65f, -1.0f),	make_float3(0.0f, 0.0f, 0.0f), 0.1f,	cv_albedo, 1.0f, cv_roughness, cv_normal,			make_float2(2.0f, 1.0f),			1, 2.0f));
+	//this->obj.push_back(new sphere(make_float3(1.0f, -0.65f, -1.0f),	make_float3(0.0f, 0.0f, 0.0f), 0.1f,	make_float3(0.06f, 0.54f, 0.96f), mt_metalness, mt_roughness, mt_normal, mt_metalness, EF, 1.0f,			make_float2(0.5f, 0.25f),			1, 0.5f));
+	//this->obj.push_back(new sphere(make_float3(-1.0f, -0.65f, -1.0f),	make_float3(0.0f, 0.0f, 0.0f), 0.1f,	make_float3(0.96f, 0.96f, 0.06f), mt_metalness, mt_roughness, mt_normal, mt_metalness, EF, 1.0f,			make_float2(0.5f, 0.25f),			1, 0.25f));
 
-	mesh::create_mesh(quad_id, make_float3(0.0f, -0.75f, 0.0f), make_float3(0.0f, 0.0f, 0.0f), make_float3(10.0f, 1.0f, 10.0f), make_float3(1.0f, 1.0f, 1.0f), 0.01f, 1.0f, this->obj);
-
+	mesh::create_mesh(quad_id, make_float3(0.0f, -0.75f, 0.0f), make_float3(0.0f, 0.0f, 0.0f), make_float3(10.0f, 1.0f, 10.0f), make_float3(1.0f, 1.0f, 1.0f), 0.01f, 1.0f, 0.0f, this->obj);
 
 
 

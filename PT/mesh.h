@@ -141,95 +141,103 @@ public:
 	}
 
 
-	static void						create_mesh(int mesh_id, const float3 &pos, const float3 &rotation, const float3 &scale, const float3 &albedo, float metalness, float roughness, std::vector<shape*> &obj)
+	static void						create_mesh(int mesh_id, const float3 &pos, const float3 &rotation, const float3 &scale, const float3 &albedo, float metalness, float roughness, float emissive, std::vector<shape*> &obj)
 	{
 		mesh_material_data mat_data;
 
 		mat_data.albedo = albedo;
 		mat_data.metalness = metalness;
 		mat_data.roughness = roughness;
+		mat_data.emissive = emissive;
 
 		mesh::load_mesh_data(mesh_id, pos, rotation, scale, mat_data, obj);
 	}
 
-	static void						create_mesh(int mesh_id, const float3 &pos, const float3 &rotation, const float3 &scale, int albedo_id, float metalness, float roughness, std::vector<shape*> &obj)
+	static void						create_mesh(int mesh_id, const float3 &pos, const float3 &rotation, const float3 &scale, int albedo_id, float metalness, float roughness, float emissive, std::vector<shape*> &obj)
 	{
 		mesh_material_data mat_data;
 
 		mat_data.albedo_id = albedo_id;
 		mat_data.metalness = metalness;
 		mat_data.roughness = roughness;
+		mat_data.emissive = emissive;
 
 		mesh::load_mesh_data(mesh_id, pos, rotation, scale, mat_data, obj);
 	}
 
-	static void						create_mesh(int mesh_id, const float3 &pos, const float3 &rotation, const float3 &scale, int albedo_id, int metalness_id, float roughness, std::vector<shape*> &obj)
+	static void						create_mesh(int mesh_id, const float3 &pos, const float3 &rotation, const float3 &scale, int albedo_id, int metalness_id, float roughness, float emissive, std::vector<shape*> &obj)
 	{
 		mesh_material_data mat_data;
 
 		mat_data.albedo_id = albedo_id;
 		mat_data.metalness_id = metalness_id;
 		mat_data.roughness = roughness;
+		mat_data.emissive = emissive;
 
 		mesh::load_mesh_data(mesh_id, pos, rotation, scale, mat_data, obj);
 	}
 
-	static void						create_mesh(int mesh_id, const float3 &pos, const float3 &rotation, const float3 &scale, int albedo_id, int metalness_id, int roughness_id, std::vector<shape*> &obj)
+	static void						create_mesh(int mesh_id, const float3 &pos, const float3 &rotation, const float3 &scale, int albedo_id, int metalness_id, int roughness_id, float emissive, std::vector<shape*> &obj)
 	{
 		mesh_material_data mat_data;
 
 		mat_data.albedo_id = albedo_id;
 		mat_data.metalness_id = metalness_id;
 		mat_data.roughness_id = roughness_id;
+		mat_data.emissive = emissive;
 
 		mesh::load_mesh_data(mesh_id, pos, rotation, scale, mat_data, obj);
 	}
 
-	static void						create_mesh(int mesh_id, const float3 &pos, const float3 &rotation, const float3 &scale, int albedo_id, float metalness, int roughness_id, std::vector<shape*> &obj)
+	static void						create_mesh(int mesh_id, const float3 &pos, const float3 &rotation, const float3 &scale, int albedo_id, float metalness, int roughness_id, float emissive, std::vector<shape*> &obj)
 	{
 		mesh_material_data mat_data;
 
 		mat_data.albedo_id = albedo_id;
 		mat_data.metalness = metalness;
 		mat_data.roughness_id = roughness_id;
+		mat_data.emissive = emissive;
 
 		mesh::load_mesh_data(mesh_id, pos, rotation, scale, mat_data, obj);
 	}
 
-	static void						create_mesh(int mesh_id, const float3 &pos, const float3 &rotation, const float3 &scale, const float3 &albedo, int metalness_id, float roughness, std::vector<shape*> &obj)
+	static void						create_mesh(int mesh_id, const float3 &pos, const float3 &rotation, const float3 &scale, const float3 &albedo, int metalness_id, float roughness, float emissive, std::vector<shape*> &obj)
 	{
 		mesh_material_data mat_data;
 
 		mat_data.albedo = albedo;
 		mat_data.metalness_id = metalness_id;
 		mat_data.roughness = roughness;
+		mat_data.emissive = emissive;
 
 		mesh::load_mesh_data(mesh_id, pos, rotation, scale, mat_data, obj);
 	}
 
-	static void						create_mesh(int mesh_id, const float3 &pos, const float3 &rotation, const float3 &scale, const float3 &albedo, int metalness_id, int roughness_id, std::vector<shape*> &obj)
+	static void						create_mesh(int mesh_id, const float3 &pos, const float3 &rotation, const float3 &scale, const float3 &albedo, int metalness_id, int roughness_id, float emissive, std::vector<shape*> &obj)
 	{
 		mesh_material_data mat_data;
 
 		mat_data.albedo = albedo;
 		mat_data.metalness_id = metalness_id;
 		mat_data.roughness_id = roughness_id;
+		mat_data.emissive = emissive;
 
 		mesh::load_mesh_data(mesh_id, pos, rotation, scale, mat_data, obj);
 	}
 
-	static void						create_mesh(int mesh_id, const float3 &pos, const float3 &rotation, const float3 &scale, const float3 &albedo, float metalness, int roughness_id, std::vector<shape*> &obj)
+	static void						create_mesh(int mesh_id, const float3 &pos, const float3 &rotation, const float3 &scale, const float3 &albedo, float metalness, int roughness_id, float emissive, std::vector<shape*> &obj)
 	{
 		mesh_material_data mat_data;
 
 		mat_data.albedo = albedo;
 		mat_data.metalness = metalness;
 		mat_data.roughness_id = roughness_id;
+		mat_data.emissive = emissive;
 
 		mesh::load_mesh_data(mesh_id, pos, rotation, scale, mat_data, obj);
 	}
 
-	static void						create_mesh(int mesh_id, const float3 &pos, const float3 &rotation, const float3 &scale, const float3 &albedo, float metalness, float roughness, int normal_id, std::vector<shape*> &obj)
+	static void						create_mesh(int mesh_id, const float3 &pos, const float3 &rotation, const float3 &scale, const float3 &albedo, float metalness, float roughness, int normal_id, float emissive, std::vector<shape*> &obj)
 	{
 		mesh_material_data mat_data;
 
@@ -237,11 +245,12 @@ public:
 		mat_data.metalness = metalness;
 		mat_data.roughness = roughness;
 		mat_data.normal_id = normal_id;
+		mat_data.emissive = emissive;
 
 		mesh::load_mesh_data(mesh_id, pos, rotation, scale, mat_data, obj);
 	}
 
-	static void						create_mesh(int mesh_id, const float3 &pos, const float3 &rotation, const float3 &scale, int albedo_id, float metalness, float roughness, int normal_id, std::vector<shape*> &obj)
+	static void						create_mesh(int mesh_id, const float3 &pos, const float3 &rotation, const float3 &scale, int albedo_id, float metalness, float roughness, int normal_id, float emissive, std::vector<shape*> &obj)
 	{
 		mesh_material_data mat_data;
 
@@ -249,11 +258,12 @@ public:
 		mat_data.metalness = metalness;
 		mat_data.roughness = roughness;
 		mat_data.normal_id = normal_id;
+		mat_data.emissive = emissive;
 
 		mesh::load_mesh_data(mesh_id, pos, rotation, scale, mat_data, obj);
 	}
 
-	static void						create_mesh(int mesh_id, const float3 &pos, const float3 &rotation, const float3 &scale, int albedo_id, int metalness_id, float roughness, int normal_id, std::vector<shape*> &obj)
+	static void						create_mesh(int mesh_id, const float3 &pos, const float3 &rotation, const float3 &scale, int albedo_id, int metalness_id, float roughness, int normal_id, float emissive, std::vector<shape*> &obj)
 	{
 		mesh_material_data mat_data;
 
@@ -261,11 +271,12 @@ public:
 		mat_data.metalness_id = metalness_id;
 		mat_data.roughness = roughness;
 		mat_data.normal_id = normal_id;
+		mat_data.emissive = emissive;
 
 		mesh::load_mesh_data(mesh_id, pos, rotation, scale, mat_data, obj);
 	}
 
-	static void						create_mesh(int mesh_id, const float3 &pos, const float3 &rotation, const float3 &scale, int albedo_id, int metalness_id, int roughness_id, int normal_id, std::vector<shape*> &obj)
+	static void						create_mesh(int mesh_id, const float3 &pos, const float3 &rotation, const float3 &scale, int albedo_id, int metalness_id, int roughness_id, int normal_id, float emissive, std::vector<shape*> &obj)
 	{
 		mesh_material_data mat_data;
 
@@ -273,11 +284,12 @@ public:
 		mat_data.metalness_id = metalness_id;
 		mat_data.roughness_id = roughness_id;
 		mat_data.normal_id = normal_id;
+		mat_data.emissive = emissive;
 
 		mesh::load_mesh_data(mesh_id, pos, rotation, scale, mat_data, obj);
 	}
 
-	static void						create_mesh(int mesh_id, const float3 &pos, const float3 &rotation, const float3 &scale, int albedo_id, float metalness, int roughness_id, int normal_id, std::vector<shape*> &obj)
+	static void						create_mesh(int mesh_id, const float3 &pos, const float3 &rotation, const float3 &scale, int albedo_id, float metalness, int roughness_id, int normal_id, float emissive, std::vector<shape*> &obj)
 	{
 		mesh_material_data mat_data;
 
@@ -285,11 +297,12 @@ public:
 		mat_data.metalness = metalness;
 		mat_data.roughness_id = roughness_id;
 		mat_data.normal_id = normal_id;
+		mat_data.emissive = emissive;
 
 		mesh::load_mesh_data(mesh_id, pos, rotation, scale, mat_data, obj);
 	}
 
-	static void						create_mesh(int mesh_id, const float3 &pos, const float3 &rotation, const float3 &scale, const float3 &albedo, int metalness_id, float roughness, int normal_id, std::vector<shape*> &obj)
+	static void						create_mesh(int mesh_id, const float3 &pos, const float3 &rotation, const float3 &scale, const float3 &albedo, int metalness_id, float roughness, int normal_id, float emissive, std::vector<shape*> &obj)
 	{
 		mesh_material_data mat_data;
 
@@ -297,11 +310,12 @@ public:
 		mat_data.metalness_id = metalness_id;
 		mat_data.roughness = roughness;
 		mat_data.normal_id = normal_id;
+		mat_data.emissive = emissive;
 
 		mesh::load_mesh_data(mesh_id, pos, rotation, scale, mat_data, obj);
 	}
 
-	static void						create_mesh(int mesh_id, const float3 &pos, const float3 &rotation, const float3 &scale, const float3 &albedo, int metalness_id, int roughness_id, int normal_id, std::vector<shape*> &obj)
+	static void						create_mesh(int mesh_id, const float3 &pos, const float3 &rotation, const float3 &scale, const float3 &albedo, int metalness_id, int roughness_id, int normal_id, float emissive, std::vector<shape*> &obj)
 	{
 		mesh_material_data mat_data;
 
@@ -309,11 +323,12 @@ public:
 		mat_data.metalness_id = metalness_id;
 		mat_data.roughness_id = roughness_id;
 		mat_data.normal_id = normal_id;
+		mat_data.emissive = emissive;
 
 		mesh::load_mesh_data(mesh_id, pos, rotation, scale, mat_data, obj);
 	}
 
-	static void						create_mesh(int mesh_id, const float3 &pos, const float3 &rotation, const float3 &scale, const float3 &albedo, float metalness, int roughness_id, int normal_id, std::vector<shape*> &obj)
+	static void						create_mesh(int mesh_id, const float3 &pos, const float3 &rotation, const float3 &scale, const float3 &albedo, float metalness, int roughness_id, int normal_id, float emissive, std::vector<shape*> &obj)
 	{
 		mesh_material_data mat_data;
 
@@ -321,6 +336,223 @@ public:
 		mat_data.metalness = metalness;
 		mat_data.roughness_id = roughness_id;
 		mat_data.normal_id = normal_id;
+		mat_data.emissive = emissive;
+
+		mesh::load_mesh_data(mesh_id, pos, rotation, scale, mat_data, obj);
+	}
+
+	static void						create_mesh(int mesh_id, const float3 &pos, const float3 &rotation, const float3 &scale, const float3 &albedo, float metalness, float roughness, int emissive_id, bool ef, float emissive, std::vector<shape*> &obj)
+	{
+		mesh_material_data mat_data;
+
+		mat_data.albedo = albedo;
+		mat_data.metalness = metalness;
+		mat_data.roughness = roughness;
+		mat_data.emissive_id = emissive_id;
+		mat_data.emissive = emissive;
+
+		mesh::load_mesh_data(mesh_id, pos, rotation, scale, mat_data, obj);
+	}
+
+	static void						create_mesh(int mesh_id, const float3 &pos, const float3 &rotation, const float3 &scale, int albedo_id, float metalness, float roughness, int emissive_id, bool ef, float emissive, std::vector<shape*> &obj)
+	{
+		mesh_material_data mat_data;
+
+		mat_data.albedo_id = albedo_id;
+		mat_data.metalness = metalness;
+		mat_data.roughness = roughness;
+		mat_data.emissive_id = emissive_id;
+		mat_data.emissive = emissive;
+
+		mesh::load_mesh_data(mesh_id, pos, rotation, scale, mat_data, obj);
+	}
+
+	static void						create_mesh(int mesh_id, const float3 &pos, const float3 &rotation, const float3 &scale, int albedo_id, int metalness_id, float roughness, int emissive_id, bool ef, float emissive, std::vector<shape*> &obj)
+	{
+		mesh_material_data mat_data;
+
+		mat_data.albedo_id = albedo_id;
+		mat_data.metalness_id = metalness_id;
+		mat_data.roughness = roughness;
+		mat_data.emissive_id = emissive_id;
+		mat_data.emissive = emissive;
+
+		mesh::load_mesh_data(mesh_id, pos, rotation, scale, mat_data, obj);
+	}
+
+	static void						create_mesh(int mesh_id, const float3 &pos, const float3 &rotation, const float3 &scale, int albedo_id, int metalness_id, int roughness_id, int emissive_id, bool ef, float emissive, std::vector<shape*> &obj)
+	{
+		mesh_material_data mat_data;
+
+		mat_data.albedo_id = albedo_id;
+		mat_data.metalness_id = metalness_id;
+		mat_data.roughness_id = roughness_id;
+		mat_data.emissive_id = emissive_id;
+		mat_data.emissive = emissive;
+
+		mesh::load_mesh_data(mesh_id, pos, rotation, scale, mat_data, obj);
+	}
+
+	static void						create_mesh(int mesh_id, const float3 &pos, const float3 &rotation, const float3 &scale, int albedo_id, float metalness, int roughness_id, int emissive_id, bool ef, float emissive, std::vector<shape*> &obj)
+	{
+		mesh_material_data mat_data;
+
+		mat_data.albedo_id = albedo_id;
+		mat_data.metalness = metalness;
+		mat_data.roughness_id = roughness_id;
+		mat_data.emissive_id = emissive_id;
+		mat_data.emissive = emissive;
+
+		mesh::load_mesh_data(mesh_id, pos, rotation, scale, mat_data, obj);
+	}
+
+	static void						create_mesh(int mesh_id, const float3 &pos, const float3 &rotation, const float3 &scale, const float3 &albedo, int metalness_id, float roughness, int emissive_id, bool ef, float emissive, std::vector<shape*> &obj)
+	{
+		mesh_material_data mat_data;
+
+		mat_data.albedo = albedo;
+		mat_data.metalness_id = metalness_id;
+		mat_data.roughness = roughness;
+		mat_data.emissive_id = emissive_id;
+		mat_data.emissive = emissive;
+
+		mesh::load_mesh_data(mesh_id, pos, rotation, scale, mat_data, obj);
+	}
+
+	static void						create_mesh(int mesh_id, const float3 &pos, const float3 &rotation, const float3 &scale, const float3 &albedo, int metalness_id, int roughness_id, int emissive_id, bool ef, float emissive, std::vector<shape*> &obj)
+	{
+		mesh_material_data mat_data;
+
+		mat_data.albedo = albedo;
+		mat_data.metalness_id = metalness_id;
+		mat_data.roughness_id = roughness_id;
+		mat_data.emissive_id = emissive_id;
+		mat_data.emissive = emissive;
+
+		mesh::load_mesh_data(mesh_id, pos, rotation, scale, mat_data, obj);
+	}
+
+	static void						create_mesh(int mesh_id, const float3 &pos, const float3 &rotation, const float3 &scale, const float3 &albedo, float metalness, int roughness_id, int emissive_id, bool ef, float emissive, std::vector<shape*> &obj)
+	{
+		mesh_material_data mat_data;
+
+		mat_data.albedo = albedo;
+		mat_data.metalness = metalness;
+		mat_data.roughness_id = roughness_id;
+		mat_data.emissive_id = emissive_id;
+		mat_data.emissive = emissive;
+
+		mesh::load_mesh_data(mesh_id, pos, rotation, scale, mat_data, obj);
+	}
+
+	static void						create_mesh(int mesh_id, const float3 &pos, const float3 &rotation, const float3 &scale, const float3 &albedo, float metalness, float roughness, int normal_id, int emissive_id, bool ef, float emissive, std::vector<shape*> &obj)
+	{
+		mesh_material_data mat_data;
+
+		mat_data.albedo = albedo;
+		mat_data.metalness = metalness;
+		mat_data.roughness = roughness;
+		mat_data.normal_id = normal_id;
+		mat_data.emissive_id = emissive_id;
+		mat_data.emissive = emissive;
+
+		mesh::load_mesh_data(mesh_id, pos, rotation, scale, mat_data, obj);
+	}
+
+	static void						create_mesh(int mesh_id, const float3 &pos, const float3 &rotation, const float3 &scale, int albedo_id, float metalness, float roughness, int normal_id, int emissive_id, bool ef, float emissive, std::vector<shape*> &obj)
+	{
+		mesh_material_data mat_data;
+
+		mat_data.albedo_id = albedo_id;
+		mat_data.metalness = metalness;
+		mat_data.roughness = roughness;
+		mat_data.normal_id = normal_id;
+		mat_data.emissive_id = emissive_id;
+		mat_data.emissive = emissive;
+
+		mesh::load_mesh_data(mesh_id, pos, rotation, scale, mat_data, obj);
+	}
+
+	static void						create_mesh(int mesh_id, const float3 &pos, const float3 &rotation, const float3 &scale, int albedo_id, int metalness_id, float roughness, int normal_id, int emissive_id, bool ef, float emissive, std::vector<shape*> &obj)
+	{
+		mesh_material_data mat_data;
+
+		mat_data.albedo_id = albedo_id;
+		mat_data.metalness_id = metalness_id;
+		mat_data.roughness = roughness;
+		mat_data.normal_id = normal_id;
+		mat_data.emissive_id = emissive_id;
+		mat_data.emissive = emissive;
+
+		mesh::load_mesh_data(mesh_id, pos, rotation, scale, mat_data, obj);
+	}
+
+	static void						create_mesh(int mesh_id, const float3 &pos, const float3 &rotation, const float3 &scale, int albedo_id, int metalness_id, int roughness_id, int normal_id, int emissive_id, bool ef, float emissive, std::vector<shape*> &obj)
+	{
+		mesh_material_data mat_data;
+
+		mat_data.albedo_id = albedo_id;
+		mat_data.metalness_id = metalness_id;
+		mat_data.roughness_id = roughness_id;
+		mat_data.normal_id = normal_id;
+		mat_data.emissive_id = emissive_id;
+		mat_data.emissive = emissive;
+
+		mesh::load_mesh_data(mesh_id, pos, rotation, scale, mat_data, obj);
+	}
+
+	static void						create_mesh(int mesh_id, const float3 &pos, const float3 &rotation, const float3 &scale, int albedo_id, float metalness, int roughness_id, int normal_id, int emissive_id, bool ef, float emissive, std::vector<shape*> &obj)
+	{
+		mesh_material_data mat_data;
+
+		mat_data.albedo_id = albedo_id;
+		mat_data.metalness = metalness;
+		mat_data.roughness_id = roughness_id;
+		mat_data.normal_id = normal_id;
+		mat_data.emissive_id = emissive_id;
+		mat_data.emissive = emissive;
+
+		mesh::load_mesh_data(mesh_id, pos, rotation, scale, mat_data, obj);
+	}
+
+	static void						create_mesh(int mesh_id, const float3 &pos, const float3 &rotation, const float3 &scale, const float3 &albedo, int metalness_id, float roughness, int normal_id, int emissive_id, bool ef, float emissive, std::vector<shape*> &obj)
+	{
+		mesh_material_data mat_data;
+
+		mat_data.albedo = albedo;
+		mat_data.metalness_id = metalness_id;
+		mat_data.roughness = roughness;
+		mat_data.normal_id = normal_id;
+		mat_data.emissive_id = emissive_id;
+		mat_data.emissive = emissive;
+
+		mesh::load_mesh_data(mesh_id, pos, rotation, scale, mat_data, obj);
+	}
+
+	static void						create_mesh(int mesh_id, const float3 &pos, const float3 &rotation, const float3 &scale, const float3 &albedo, int metalness_id, int roughness_id, int normal_id, int emissive_id, bool ef, float emissive, std::vector<shape*> &obj)
+	{
+		mesh_material_data mat_data;
+
+		mat_data.albedo = albedo;
+		mat_data.metalness_id = metalness_id;
+		mat_data.roughness_id = roughness_id;
+		mat_data.normal_id = normal_id;
+		mat_data.emissive_id = emissive_id;
+		mat_data.emissive = emissive;
+
+		mesh::load_mesh_data(mesh_id, pos, rotation, scale, mat_data, obj);
+	}
+
+	static void						create_mesh(int mesh_id, const float3 &pos, const float3 &rotation, const float3 &scale, const float3 &albedo, float metalness, int roughness_id, int normal_id, int emissive_id, bool ef, float emissive, std::vector<shape*> &obj)
+	{
+		mesh_material_data mat_data;
+
+		mat_data.albedo = albedo;
+		mat_data.metalness = metalness;
+		mat_data.roughness_id = roughness_id;
+		mat_data.normal_id = normal_id;
+		mat_data.emissive_id = emissive_id;
+		mat_data.emissive = emissive;
 
 		mesh::load_mesh_data(mesh_id, pos, rotation, scale, mat_data, obj);
 	}
