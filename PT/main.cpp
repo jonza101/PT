@@ -19,50 +19,6 @@ SDL_Surface *PT::get_surf_from_pixels(void *data, int w, int h)
 }
 
 
-void		PT::merge_imgs()
-{
-	int img1_spp = 64;
-	int img2_spp = 64;
-
-	int img1_id = image::load_image("screenshots/pt__64.png");
-	int img2_id = image::load_image("screenshots/pt__merged.png");
-
-	const image_data *img1 = image::get_image_data(img1_id);
-	const image_data *img2 = image::get_image_data(img2_id);
-
-	int *data = (int*)malloc(sizeof(int) * img1->w * img1->h);
-
-	int i = -1;
-	while (++i < img1->w * img1->h)
-	{
-		int color1 = img1->data[i];
-		float rc1 = (float)((color1 >> 16) & 0xFF) / 255.0f;
-		float gc1 = (float)((color1 >> 8) & 0xFF) / 255.0f;
-		float bc1 = (float)(color1 & 0xFF) / 255.0f;
-
-		int color2 = img2->data[i];
-		float rc2 = (float)((color2 >> 16) & 0xFF) / 255.0f;
-		float gc2 = (float)((color2 >> 8) & 0xFF) / 255.0f;
-		float bc2 = (float)(color2 & 0xFF) / 255.0f;
-
-		//int rc = (int)((rc1 + rc2) * 0.5f * 255.0f);
-		//int gc = (int)((gc1 + gc2) * 0.5f * 255.0f);
-		//int bc = (int)((bc1 + bc2) * 0.5f * 255.0f);
-
-		int rc = (int)((float)(rc1 * img1_spp + rc2 * img2_spp) / (float)(img1_spp + img2_spp) * 255.0f);
-		int gc = (int)((float)(gc1 * img1_spp + gc2 * img2_spp) / (float)(img1_spp + img2_spp) * 255.0f);
-		int bc = (int)((float)(bc1 * img1_spp + bc2 * img2_spp) / (float)(img1_spp + img2_spp) * 255.0f);
-
-		int color = ((rc & 0xFF) << 16) + ((gc & 0xFF) << 8) + ((bc & 0xFF));
-		data[i] = color;
-	}
-
-	SDL_Surface *surf = this->get_surf_from_pixels(data, img1->w, img1->h);
-	IMG_SavePNG(surf, "screenshots/pt__merged.png");
-
-	exit(0);
-}
-
 
 void	PT::rma_convert()
 {

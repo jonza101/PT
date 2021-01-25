@@ -66,6 +66,7 @@ void	PT::malloc_gpu_scene()
 		while (++i < 6)
 			this->h_scene->env_map[i] = env_map[i];
 	}
+	this->h_scene->env_ior = this->env_ior;
 
 
 	int i = -1;

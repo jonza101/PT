@@ -39,52 +39,23 @@ public:
 	float2	uv[3];
 
 
-	triangle(const float3 vert[3], const float3 norm[3], const float2 uv[3], const float3 &albedo, float metalness, float roughness, float emissive);
-	triangle(const float3 vert[3], const float3 norm[3], const float2 uv[3], int albedo_id, float metalness, float roughness, float emissive);
-	triangle(const float3 vert[3], const float3 norm[3], const float2 uv[3], int albedo_id, int metalness_id, float roughness, float emissive);
-	triangle(const float3 vert[3], const float3 norm[3], const float2 uv[3], int albedo_id, int metalness_id, int roughness_id, float emissive);
-	triangle(const float3 vert[3], const float3 norm[3], const float2 uv[3], int albedo_id, float metalness, int roughness_id, float emissive);
-	triangle(const float3 vert[3], const float3 norm[3], const float2 uv[3], const float3 &albedo, int metalness_id, float roughness, float emissive);
-	triangle(const float3 vert[3], const float3 norm[3], const float2 uv[3], const float3 &albedo, int metalness_id, int roughness_id, float emissive);
-	triangle(const float3 vert[3], const float3 norm[3], const float2 uv[3], const float3 &albedo, float metalness, int roughness_id, float emissive);
-	triangle(const float3 vert[3], const float3 norm[3], const float2 uv[3], const float3 &albedo, float metalness, float roughness, int normal_id, float emissive);
-	triangle(const float3 vert[3], const float3 norm[3], const float2 uv[3], int albedo_id, float metalness, float roughness, int normal_id, float emissive);
-	triangle(const float3 vert[3], const float3 norm[3], const float2 uv[3], int albedo_id, int metalness_id, float roughness, int normal_id, float emissive);
-	triangle(const float3 vert[3], const float3 norm[3], const float2 uv[3], int albedo_id, int metalness_id, int roughness_id, int normal_id, float emissive);
-	triangle(const float3 vert[3], const float3 norm[3], const float2 uv[3], int albedo_id, float metalness, int roughness_id, int normal_id, float emissive);
-	triangle(const float3 vert[3], const float3 norm[3], const float2 uv[3], const float3 &albedo, int metalness_id, float roughness, int normal_id, float emissive);
-	triangle(const float3 vert[3], const float3 norm[3], const float2 uv[3], const float3 &albedo, int metalness_id, int roughness_id, int normal_id, float emissive);
-	triangle(const float3 vert[3], const float3 norm[3], const float2 uv[3], const float3 &albedo, float metalness, int roughness_id, int normal_id, float emissive);
-	triangle(const float3 vert[3], const float3 norm[3], const float2 uv[3], const float3 &albedo, float metalness, float roughness, int emissive_id);
-	triangle(const float3 vert[3], const float3 norm[3], const float2 uv[3], int albedo_id, float metalness, float roughness, int emissive_id);
-	triangle(const float3 vert[3], const float3 norm[3], const float2 uv[3], int albedo_id, int metalness_id, float roughness, int emissive_id);
-	triangle(const float3 vert[3], const float3 norm[3], const float2 uv[3], int albedo_id, int metalness_id, int roughness_id, int emissive_id);
-	triangle(const float3 vert[3], const float3 norm[3], const float2 uv[3], int albedo_id, float metalness, int roughness_id, int emissive_id);
-	triangle(const float3 vert[3], const float3 norm[3], const float2 uv[3], const float3 &albedo, int metalness_id, float roughness, int emissive_id);
-	triangle(const float3 vert[3], const float3 norm[3], const float2 uv[3], const float3 &albedo, int metalness_id, int roughness_id, int emissive_id);
-	triangle(const float3 vert[3], const float3 norm[3], const float2 uv[3], const float3 &albedo, float metalness, int roughness_id, int emissive_id);
-	triangle(const float3 vert[3], const float3 norm[3], const float2 uv[3], const float3 &albedo, float metalness, float roughness, int normal_id, int emissive_id);
-	triangle(const float3 vert[3], const float3 norm[3], const float2 uv[3], int albedo_id, float metalness, float roughness, int normal_id, int emissive_id);
-	triangle(const float3 vert[3], const float3 norm[3], const float2 uv[3], int albedo_id, int metalness_id, float roughness, int normal_id, int emissive_id);
-	triangle(const float3 vert[3], const float3 norm[3], const float2 uv[3], int albedo_id, int metalness_id, int roughness_id, int normal_id, int emissive_id);
-	triangle(const float3 vert[3], const float3 norm[3], const float2 uv[3], int albedo_id, float metalness, int roughness_id, int normal_id, int emissive_id);
-	triangle(const float3 vert[3], const float3 norm[3], const float2 uv[3], const float3 &albedo, int metalness_id, float roughness, int normal_id, int emissive_id);
-	triangle(const float3 vert[3], const float3 norm[3], const float2 uv[3], const float3 &albedo, int metalness_id, int roughness_id, int normal_id, int emissive_id);
-	triangle(const float3 vert[3], const float3 norm[3], const float2 uv[3], const float3 &albedo, float metalness, int roughness_id, int normal_id, int emissive_id);
-
-	triangle(const float3 vert[3], const float3 norm[3], const float2 uv[3], mesh_material_data mat_data)
+	triangle(const float3 vert[3], const float3 norm[3], const float2 uv[3], material_data mat_data)
 	{
 		this->set_triangle_props(vert, norm, uv);
 
 		this->albedo_id = mat_data.albedo_id;
 		this->metalness_id = mat_data.metalness_id;
 		this->roughness_id = mat_data.roughness_id;
+		this->reflectance_id = mat_data.reflectance_id;
+		this->ior_id = mat_data.ior_id;
 		this->normal_id = mat_data.normal_id;
 		this->emissive_id = mat_data.emissive_id;
 
 		this->albedo = mat_data.albedo;
 		this->metalness = mat_data.metalness;
 		this->roughness = mat_data.roughness;
+		this->reflectance = mat_data.reflectance;
+		this->ior = mat_data.ior;
 		this->emissive = mat_data.emissive;
 	}
 
@@ -112,14 +83,18 @@ public:
 		h_scene->obj[id].albedo_id = this->albedo_id;
 		h_scene->obj[id].metalness_id = this->metalness_id;
 		h_scene->obj[id].roughness_id = this->roughness_id;
+		h_scene->obj[id].reflectance_id = this->reflectance_id;
+		h_scene->obj[id].ior_id = this->ior_id;
 		h_scene->obj[id].normal_id = this->normal_id;
 		h_scene->obj[id].emissive_id = this->emissive_id;
-
-		h_scene->obj[id].uv_scale = this->uv_scale;
 
 		h_scene->obj[id].albedo = this->albedo;
 		h_scene->obj[id].metalness = this->metalness;
 		h_scene->obj[id].roughness = this->roughness;
+		h_scene->obj[id].reflectance = this->reflectance;
+		h_scene->obj[id].ior = this->ior;
 		h_scene->obj[id].emissive = this->emissive;
+
+		h_scene->obj[id].uv_scale = this->uv_scale;
 	}
 };

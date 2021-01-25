@@ -87,8 +87,6 @@
     <ClCompile Include="gpu_scene.cpp" />
     <ClCompile Include="init.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="sphere.cpp" />
-    <ClCompile Include="triangle.cpp" />
     <ClCompile Include="vec_math.cpp" />
   </ItemGroup>
   <ItemGroup>

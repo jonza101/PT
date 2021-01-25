@@ -36,7 +36,7 @@
 
 #define EPSILON 0.000001f
 
-#define PDF_CONST ((float)1.0 / (float)(2.0f * M_PI))
+#define D_PDF_CONST ((float)1.0 / (float)(2.0f * M_PI))
 #define HDR_CONST (1.0f / 2.2f)
 
 
@@ -120,6 +120,7 @@ private:
 	std::vector<shape*>		obj;
 	std::vector<light*>		lights;
 	float3					background_color = make_float3(0.0f, 0.0f, 0.0f);
+	float					env_ior = 1.0f;
 
 
 	cudaError_t				cuda_status;

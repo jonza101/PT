@@ -62,16 +62,16 @@ void	PT::init()
 	int quad_id = mesh::load_mesh("resources/mesh/quad.obj");
 
 
-	//int nx = image::load_image("resources/cubemap/lost_city/nx.png");
-	//int ny = image::load_image("resources/cubemap/lost_city/ny.png");
-	//int nz = image::load_image("resources/cubemap/lost_city/nz.png");
-	//int px = image::load_image("resources/cubemap/lost_city/px.png");
-	//int py = image::load_image("resources/cubemap/lost_city/py.png");
-	//int pz = image::load_image("resources/cubemap/lost_city/pz.png");
-	//image::set_env_map(nx, px, ny, py, nz, pz);
+	int nx = image::load_image("resources/cubemap/gamrig/nx.png");
+	int ny = image::load_image("resources/cubemap/gamrig/ny.png");
+	int nz = image::load_image("resources/cubemap/gamrig/nz.png");
+	int px = image::load_image("resources/cubemap/gamrig/px.png");
+	int py = image::load_image("resources/cubemap/gamrig/py.png");
+	int pz = image::load_image("resources/cubemap/gamrig/pz.png");
+	image::set_env_map(nx, px, ny, py, nz, pz);
 
-	this->background_color = make_float3(0.64f, 0.67f, 0.68f);
-	this->lights.push_back(new light(make_float3(1.0f, 1.0f, 1.0f), 1.0f, make_float3(1.0f, -0.35f, 0.5f), 0.125f));
+	//this->background_color = make_float3(0.64f, 0.67f, 0.68f);
+	//this->lights.push_back(new light(make_float3(1.0f, 1.0f, 1.0f), 1.0f, make_float3(1.0f, -0.35f, 0.5f), 0.125f));
 
 
 	int p_albedo = image::load_image("resources/p/p_albedo.png");
@@ -82,18 +82,71 @@ void	PT::init()
 	int mt_roughness = image::load_image("resources/mt/mt_roughness.png");
 	int mt_normal = image::load_image("resources/mt/mt_normal.png");
 
+	int m_albedo = image::load_image("resources/m/m_albedo.png");
+	int m_roughness = image::load_image("resources/m/m_roughness.png");
+	int m_normal = image::load_image("resources/m/m_normal.png");
 
 
-	this->obj.push_back(new sphere(make_float3(0.0f, 0.0f, 0.0f),		make_float3(0.0f, 0.0f, 0.0f), 0.75f,	p_albedo, 0.01f, 0.5f, p_normal, mt_roughness, 1, 0.25f,								make_float2(2.0f, 1.0f)));
-	this->obj.push_back(new sphere(make_float3(-1.5f, -0.25f, 0.25f),	make_float3(0.0f, 0.0f, 0.0f), 0.5f,	mt_albedo, mt_metalness, mt_roughness, mt_normal, 0.0f,				make_float2(1.75f, 1.0f)));
+	material_data q_mat;
+	q_mat.metalness = 0.01f;
 
-	//this->obj.push_back(new sphere(make_float3(-1.0f, 1.0f, -1.0f),		make_float3(0.0f, 0.0f, 0.0f), 0.1f,	mt_albedo, mt_metalness, mt_roughness, mt_normal, mt_metalness, EF, 1.0f,		make_float2(1.0f, 0.5f),			1, 10.0f));
+	material_data p_mat;
+	p_mat.albedo_id = p_albedo;
+	p_mat.metalness = 0.01f;
+	p_mat.roughness = 0.5f;
+	p_mat.normal_id = p_normal;
+	//p_mat.emissive_id = mt_roughness;
+	//p_mat.emissive = 0.25f;
+	p_mat.uv_scale = make_float2(2.0, 1.0f);
+
+	material_data mt_mat;
+	mt_mat.albedo_id = mt_albedo;
+	mt_mat.metalness_id = mt_metalness;
+	mt_mat.roughness_id = mt_roughness;
+	mt_mat.normal_id = mt_normal;
+	//mt_mat.emissive_id = mt_roughness;
+	//mt_mat.emissive = 0.25f;
+	mt_mat.uv_scale = make_float2(1.75f, 1.0f);
+
+	material_data m_mat;
+	//m_mat.albedo_id = m_albedo;
+	m_mat.albedo = make_float3(1.0f, 1.0f, 1.0f);
+	m_mat.metalness = 0.01f;
+	m_mat.roughness = 1.0f;
+	//m_mat.roughness_id = m_roughness;
+	m_mat.reflectance = 1.0f;
+	m_mat.ior = 1.25f;
+	//m_mat.normal_id = m_normal;
+	m_mat.uv_scale = make_float2(2.0f, 1.0f);
+
+	material_data l_mat;
+	l_mat.albedo_id = mt_albedo;
+	l_mat.metalness_id = mt_metalness;
+	l_mat.roughness_id = mt_roughness;
+	l_mat.normal_id = mt_normal;
+	l_mat.emissive_id = mt_metalness;
+	l_mat.emissive = 1.0f;
+	l_mat.uv_scale = make_float2(1.0f, 0.5f);
+
+
+	//this->obj.push_back(new sphere(make_float3(0.0f, 0.0f, 0.0f),		make_float3(0.0f, 0.0f, 0.0f), 0.75f,	p_mat));
+	this->obj.push_back(new sphere(make_float3(0.0f, 0.0f, 0.0f),		make_float3(0.0f, 0.0f, 0.0f), 0.75f,	m_mat));
+	this->obj.push_back(new sphere(make_float3(1.6f, 0.0f, 0.0f),		make_float3(0.0f, 0.0f, 0.0f), 0.75f,	p_mat));
+	//this->obj.push_back(new sphere(make_float3(-1.5f, -0.25f, 0.25f),	make_float3(0.0f, 0.0f, 0.0f), 0.5f,	mt_mat));
+
+	//this->obj.push_back(new sphere(make_float3(-1.0f, 1.0f, -1.0f),		make_float3(0.0f, 0.0f, 0.0f), 0.1f,	l_mat,			1, 40.0f));
 	
 	//this->obj.push_back(new sphere(make_float3(1.0f, -0.65f, -1.0f),	make_float3(0.0f, 0.0f, 0.0f), 0.1f,	make_float3(0.06f, 0.54f, 0.96f), mt_metalness, mt_roughness, mt_normal, mt_metalness, EF, 1.0f,			make_float2(0.5f, 0.25f),			1, 0.5f));
 	//this->obj.push_back(new sphere(make_float3(-1.0f, -0.65f, -1.0f),	make_float3(0.0f, 0.0f, 0.0f), 0.1f,	make_float3(0.96f, 0.96f, 0.06f), mt_metalness, mt_roughness, mt_normal, mt_metalness, EF, 1.0f,			make_float2(0.5f, 0.25f),			1, 0.25f));
 
-	mesh::create_mesh(quad_id, make_float3(0.0f, -0.75f, 0.0f), make_float3(0.0f, 0.0f, 0.0f), make_float3(10.0f, 1.0f, 10.0f), make_float3(1.0f, 1.0f, 1.0f), 0.01f, 1.0f, 0.0f, this->obj);
+	//mesh::create_mesh(quad_id, make_float3(0.0f, -0.75f, 0.0f), make_float3(0.0f, 0.0f, 0.0f), make_float3(10.0f, 1.0f, 10.0f), q_mat, this->obj);
 
+	//this->obj.push_back(new plane(make_float3(0.0f, -0.75f, 5.0f),		make_float3(0.0f, 1.0f, 0.0f),			make_float3(1.0f, 1.0f, 1.0f),		0.1f, 1.0f));
+	//this->obj.push_back(new plane(make_float3(0.0f, 9.25f, 5.0f),		make_float3(0.0f, 1.0f, 0.0f),			make_float3(1.0f, 1.0f, 1.0f),		0.1f, 1.0f));
+	//this->obj.push_back(new plane(make_float3(0.0f, 0.0f, -5.0f),		make_float3(0.0f, 0.0f, 1.0f),			make_float3(1.0f, 1.0f, 1.0f),		0.1f, 1.0f));
+	//this->obj.push_back(new plane(make_float3(0.0f, 0.0f, 5.0f),		make_float3(0.0f, 0.0f, -1.0f),			make_float3(0.25f, 0.25f, 1.0f),	0.1f, 1.0f));
+	//this->obj.push_back(new plane(make_float3(-3.0, 0.0f, 0.0f),		make_float3(1.0f, 0.0f, 0.0f),			make_float3(1.0f, 1.0f, 1.0f),	0.1f, 1.0f));
+	//this->obj.push_back(new plane(make_float3(3.0, 0.0f, 0.0f),			make_float3(-1.0f, 0.0f, 0.0f),			make_float3(1.0f, 1.0f, 1.0f),	0.1f, 1.0f));
 
 
 	//this->rma_convert();

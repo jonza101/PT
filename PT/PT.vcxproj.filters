@@ -30,12 +30,6 @@
     <ClCompile Include="gpu_scene.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="sphere.cpp">
-      <Filter>src\sphere</Filter>
-    </ClCompile>
-    <ClCompile Include="triangle.cpp">
-      <Filter>src\triangle</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pt.h">

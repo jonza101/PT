@@ -30,6 +30,8 @@ public:
 		h_scene->obj[id].albedo_id = this->albedo_id;
 		h_scene->obj[id].metalness_id = this->metalness_id;
 		h_scene->obj[id].roughness_id = this->roughness_id;
+		h_scene->obj[id].reflectance_id = this->reflectance_id;
+		h_scene->obj[id].ior_id = this->ior_id;
 		h_scene->obj[id].normal_id = this->normal_id;
 		h_scene->obj[id].emissive_id = this->emissive_id;
 
@@ -38,6 +40,8 @@ public:
 		h_scene->obj[id].albedo = this->albedo;
 		h_scene->obj[id].metalness = this->metalness;
 		h_scene->obj[id].roughness = this->roughness;
+		h_scene->obj[id].reflectance = this->reflectance;
+		h_scene->obj[id].ior = this->ior;
 		h_scene->obj[id].emissive = this->emissive;
 	}
 };

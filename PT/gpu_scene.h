@@ -49,6 +49,8 @@ struct				d_obj_data
 	int				albedo_id;
 	int				metalness_id;
 	int				roughness_id;
+	int				reflectance_id;
+	int				ior_id;
 	int				normal_id;
 	int				emissive_id;
 
@@ -57,6 +59,8 @@ struct				d_obj_data
 	float3			albedo;
 	float			metalness;
 	float			roughness;
+	float			reflectance;
+	float			ior;
 	float			emissive;
 
 
@@ -74,4 +78,6 @@ struct				gpu_scene
 	float3			background_color;
 	int				env_map_status;
 	int				*env_map;
+
+	float			env_ior;
 };

@@ -29,12 +29,16 @@ public:
 	int				albedo_id = -1;
 	int				metalness_id = -1;
 	int				roughness_id = -1;
+	int				reflectance_id = -1;
+	int				ior_id = -1;
 	int				normal_id = -1;
 	int				emissive_id = -1;
 
 	float3			albedo;
 	float			metalness;
 	float			roughness;
+	float			reflectance = 0.0f;
+	float			ior = 1.0f;
 	float			emissive = 0.0f;
 
 	float2			uv_scale;
@@ -45,16 +49,22 @@ public:
 };
 
 
-struct					mesh_material_data
+struct					material_data
 {
 	int					albedo_id = -1;
 	int					metalness_id = -1;
 	int					roughness_id = -1;
+	int					reflectance_id = -1;
+	int					ior_id = -1;
 	int					normal_id = -1;
 	int					emissive_id = -1;
 
-	float3				albedo;
-	float				metalness;
-	float				roughness;
-	float				emissive;
+	float3				albedo = make_float3(1.0f, 1.0f, 1.0f);
+	float				metalness = 1.0f;
+	float				roughness = 1.0f;
+	float				reflectance = 0.0f;
+	float				ior = 1.0f;
+	float				emissive = 0.0f;
+
+	float2				uv_scale = make_float2(1.0f, 1.0f);
 };
