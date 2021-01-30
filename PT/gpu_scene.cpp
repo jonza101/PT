@@ -30,8 +30,8 @@ void	PT::create_lights()
 		if (this->obj[i]->is_light)
 		{
 			//this->lights.push_back(new light(this->obj[i]->emission, this->obj[i]->intensity, i));
-			shape *obj = this->obj[i];
-			this->lights.push_back(new light(obj->albedo, obj->albedo_id, obj->metalness, obj->metalness_id, obj->roughness, obj->roughness_id, obj->normal_id, obj->uv_scale, obj->intensity, i));
+			shape *obj = this->obj[i];																									//	ASD
+			this->lights.push_back(new light(obj->albedo, obj->albedo_id, obj->metalness, obj->metalness_id, obj->reflectance_roughness, obj->reflectance_roughness_id, obj->normal_id, obj->uv_scale, obj->intensity, i));
 		}
 	}
 }

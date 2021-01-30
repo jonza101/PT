@@ -20,32 +20,40 @@ enum obj_type
 class shape
 {
 public:
-	int				type;
-	int				is_light;
+	int					type;
+	int					is_light;
 
-	float3			pos;
-	float3			orientation;
+	float3				pos;
+	float3				orientation;
 
-	int				albedo_id = -1;
-	int				metalness_id = -1;
-	int				roughness_id = -1;
-	int				reflectance_id = -1;
-	int				ior_id = -1;
-	int				normal_id = -1;
-	int				emissive_id = -1;
+	int					albedo_id;
+	int					metalness_id;
+	int					reflectance_roughness_id;
+	int					transparency_roughness_id;
+	int					reflectance_id;
+	int					transparency_id;
+	int					absorption_id;
+	int					fresnel_reflectance_id;
+	int					ior_id;
+	int					normal_id;
+	int					emissive_id;
 
-	float3			albedo;
-	float			metalness;
-	float			roughness;
-	float			reflectance = 0.0f;
-	float			ior = 1.0f;
-	float			emissive = 0.0f;
+	float3				albedo;
+	float				metalness;
+	float				reflectance_roughness;
+	float				transparency_roughness;
+	float				reflectance;
+	float				transparency;
+	float				absorption;
+	float				fresnel_reflectance;
+	float				ior;
+	float				emissive;
 
-	float2			uv_scale;
-	float			intensity;
+	float2				uv_scale;
+	float				intensity;
 
 
-	virtual void	d_malloc(gpu_scene *h_scene, const int id, cudaError_t &cuda_status) = 0;
+	virtual void		d_malloc(gpu_scene *h_scene, const int id, cudaError_t &cuda_status) = 0;
 };
 
 
@@ -53,16 +61,24 @@ struct					material_data
 {
 	int					albedo_id = -1;
 	int					metalness_id = -1;
-	int					roughness_id = -1;
+	int					reflectance_roughness_id = -1;
+	int					transparency_roughness_id = -1;
 	int					reflectance_id = -1;
+	int					transparency_id = -1;
+	int					absorption_id = -1;
+	int					fresnel_reflectance_id = -1;
 	int					ior_id = -1;
 	int					normal_id = -1;
 	int					emissive_id = -1;
 
 	float3				albedo = make_float3(1.0f, 1.0f, 1.0f);
 	float				metalness = 1.0f;
-	float				roughness = 1.0f;
-	float				reflectance = 0.0f;
+	float				reflectance_roughness = 1.0f;
+	float				transparency_roughness = 0.0f;
+	float				reflectance = 1.0f;
+	float				transparency = 0.0f;
+	float				absorption = 0.0f;
+	float				fresnel_reflectance = 0.0f;
 	float				ior = 1.0f;
 	float				emissive = 0.0f;
 

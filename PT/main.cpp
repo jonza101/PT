@@ -59,6 +59,7 @@ void	PT::screenshot(const char *file_path)
 {
 	SDL_Surface *surf = this->get_surf_from_pixels(this->h_data, this->win_wh.x, this->win_wh.y);
 	IMG_SavePNG(surf, file_path);
+	std::cout << "Saved to " << file_path << '\n';
 }
 
 
@@ -104,8 +105,6 @@ int		main()
 	TTF_Init();
 
 	PT *pt = new PT("PT", 1920, 1080, SDL_WINDOW_HIDDEN);//SDL_WINDOW_SHOWN);
-	//pt->create_camera(make_float3(0.0f, 0.5f, -1.75f), 75.0f, make_float3(0.0f, 0.0f, 1.0f), EPSILON, FLT_MAX);
-	pt->create_camera(make_float3(0.0f, 0.0f, -3.0f), 70.0f, make_float3(0.0f, 0.0f, 1.0f), EPSILON, FLT_MAX);
 
 	pt->init();
 	pt->update();

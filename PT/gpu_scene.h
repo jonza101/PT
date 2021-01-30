@@ -4,6 +4,7 @@
 
 
 #define MAX_BOUNCES 10
+#define CUTOFF_THRESHOLD 5
 
 
 struct				gpu_cam
@@ -48,8 +49,12 @@ struct				d_obj_data
 
 	int				albedo_id;
 	int				metalness_id;
-	int				roughness_id;
+	int				reflectance_roughness_id;
+	int				transparency_roughness_id;
 	int				reflectance_id;
+	int				transparency_id;
+	int				absorption_id;
+	int				fresnel_reflectance_id;
 	int				ior_id;
 	int				normal_id;
 	int				emissive_id;
@@ -58,8 +63,12 @@ struct				d_obj_data
 
 	float3			albedo;
 	float			metalness;
-	float			roughness;
+	float			reflectance_roughness;
+	float			transparency_roughness;
 	float			reflectance;
+	float			transparency;
+	float			absorption;
+	float			fresnel_reflectance;
 	float			ior;
 	float			emissive;
 

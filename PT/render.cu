@@ -85,61 +85,40 @@ __device__ float3	reflect(const float3 &i, const float3 &n)
 
 __device__ float3	refract(const float3 &i, const float3 &n, float etai, float etat)
 {
-	float cosi = dot(i, n);
-
-	float3 nt = n;
+	float cosi = clamp(-1.0f, 1.0f, dot(i, n));
 	if (cosi < 0.0f)
 		cosi = -cosi;
-
 	float eta = (float)etai / (float)etat;
-	float k = 1.0f - eta * eta * (1.0f - cosi * cosi);
-
-	float3 t = make_float3(0.0f, 0.0f, 0.0f);
+	float k = 1.0f - eta * eta * (1.0f - cosi * cosi); 
 	if (k < 0.0f)
-		return (t);
+		return (i);
 
-	t.x = eta * i.x + (eta * cosi - sqrtf(k)) * nt.x;
-	t.y = eta * i.y + (eta * cosi - sqrtf(k)) * nt.y;
-	t.z = eta * i.z + (eta * cosi - sqrtf(k)) * nt.z;
+	k = sqrtf(k);
+	float3 r;
+	r.x = eta * i.x + (eta * cosi - k) * n.x;
+	r.y = eta * i.y + (eta * cosi - k) * n.y;
+	r.z = eta * i.z + (eta * cosi - k) * n.z;
 
-	return (t);
+	return (r);
 }
 
 __device__ float	fresnel(const float3 &i, const float3 &n, float etai, float etat)
 {
-	float cosi = fmaxf(-1.0f, fminf(1.0f, dot(i, n)));
-	float sint = (float)etai / (float)etat * sqrtf(fmaxf(0.0f, 1.0f - cosi * cosi));
-	if (sint >= 1.0f)
-		return (1.0f);
-
-	float cost = sqrtf(fmaxf(0.0f, 1.0f - sint * sint));
-	cosi = fabsf(cosi);
-	float rs = (float)((etat * cosi) - (etai * cost)) / (float)((etat * cosi) + (etai * cost));
-	float rp = (float)((etai * cosi) - (etat * cost)) / (float)((etai * cosi) + (etat * cost));
-	float fr = (rs * rs + rp * rp) * 0.5f;
-
-	return (1.0f - fr);
-}
-
-__device__ float	_fresnel(const float3 &i, const float3 &n, float n1, float n2, float f0, float f90)
-{
-	float r0 = (float)(n1 - n2) / (float)(n1 + n2);
+	float r0 = (float)(etai - etat) / (float)(etai + etat);
 	r0 *= r0;
 	float cosx = -dot(i, n);
-	if (n1 > n2)
+	if (etai > etat)
 	{
-		float nn = (float)n1 / (float)n2;
-		float sint2 = nn * nn * (1.0f - cosx * cosx);
-		// Total internal reflection
+		float eta = (float)etai / (float)etat;
+		float sint2 = eta * eta * (1.0f - cosx * cosx);
 		if (sint2 > 1.0f)
-			return (f90);
+			return (1.0f);
 		cosx = sqrtf(1.0f - sint2);
 	}
 	float x = 1.0f - cosx;
-	float ret = r0 + (1.0f - r0) * x * x * x * x * x;
+	float ret = r0 + (1.0f - r0) * x * x * x * x;
 
-	// adjust reflect multiplier for object reflectivity
-	return lerp(f0, f90, ret);
+	return (ret);
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -310,16 +289,36 @@ __device__ int		shadow_factor(const float3 &origin, const float3 &dir, float z_n
 		{
 			case SPHERE:
 			{
-				oc.x = origin.x - scene->obj[i].pos.x;
-				oc.y = origin.y - scene->obj[i].pos.y;
-				oc.z = origin.z - scene->obj[i].pos.z;
+				oc.x = scene->obj[i].pos.x - origin.x;
+				oc.y = scene->obj[i].pos.y - origin.y;
+				oc.z = scene->obj[i].pos.z - origin.z;
 
-				float a = dot(dir, dir);
-				float b = 2.0f * dot(oc, dir);
-				float c = dot(oc, oc) - scene->obj[i].radius * scene->obj[i].radius;
-				float discr = b * b - 4.0f * a * c;
-				float dist = (float)(-b - sqrtf(fmaxf(0.0f, discr))) / (float)(2.0f * a);
-				t = -1.0f + (discr >= 0.0f) * (dist + 1.0f);
+				float tca = dot(oc, dir);
+				if (tca < 0.0f)
+					break;
+
+				float radius2 = scene->obj[i].radius * scene->obj[i].radius;
+				float d2 = dot(oc, oc) - tca * tca;
+				if (d2 > radius2)
+					break;
+
+				float thc = sqrtf(radius2 - d2);
+				float t0 = tca - thc;
+				float t1 = tca + thc;
+				if (t0 > t1)
+				{
+					float temp = t0;
+					t0 = t1;
+					t1 = temp;
+				}
+				if (t0 < 0.0f)
+				{
+					t0 = t1;
+					if (t0 < 0.0f)
+						break;
+				}
+				t = t0;
+
 				break;
 			}
 			case PLANE:
@@ -399,16 +398,36 @@ __device__ int		intersection(const float3 &origin, const float3 &dir, float z_ne
 		{
 			case SPHERE:
 			{
-				oc.x = origin.x - scene->obj[i].pos.x;
-				oc.y = origin.y - scene->obj[i].pos.y;
-				oc.z = origin.z - scene->obj[i].pos.z;
+				oc.x = scene->obj[i].pos.x - origin.x;
+				oc.y = scene->obj[i].pos.y - origin.y;
+				oc.z = scene->obj[i].pos.z - origin.z;
 
-				float a = dot(dir, dir);
-				float b = 2.0f * dot(oc, dir);
-				float c = dot(oc, oc) - scene->obj[i].radius * scene->obj[i].radius;
-				float discr = b * b - 4.0f * a * c;
-				float dist = (float)(-b - sqrtf(fmaxf(0.0f, discr))) / (float)(2.0f * a);
-				t = -1.0f + (discr >= 0.0f) * (dist + 1.0f);
+				float tca = dot(oc, dir);
+				if (tca < 0.0f)
+					break;
+
+				float radius2 = scene->obj[i].radius * scene->obj[i].radius;
+				float d2 = dot(oc, oc) - tca * tca;
+				if (d2 > radius2)
+					break;
+
+				float thc = sqrtf(radius2 - d2);
+				float t0 = tca - thc;
+				float t1 = tca + thc;
+				if (t0 > t1)
+				{
+					float temp = t0;
+					t0 = t1;
+					t1 = temp;
+				}
+				if (t0 < 0.0f)
+				{
+					t0 = t1;
+					if (t0 < 0.0f)
+						break;
+				}
+				t = t0;
+
 				break;
 			}
 			case PLANE:
@@ -814,7 +833,7 @@ __device__ float3	trace(float3 &origin, float3 &dir, float z_near, float z_far, 
 	float3 curr_dir = dir;
 	float3 view_dir;
 	
-	float curr_ior = scene->env_ior;
+	float env_ior = scene->env_ior;
 
 
 	float3 color;
@@ -836,7 +855,9 @@ __device__ float3	trace(float3 &origin, float3 &dir, float z_near, float z_far, 
 	while (++b < MAX_BOUNCES)	//	MAX_BOUNCES
 	{
 		float dist;
+		int inside_factor = 1;
 		int hit_obj_id = intersection(curr_origin, curr_dir, z_near, z_far, scene, dist);
+
 		if (hit_obj_id >= 0)
 		{
 			point.x = curr_origin.x + curr_dir.x * dist;
@@ -852,9 +873,35 @@ __device__ float3	trace(float3 &origin, float3 &dir, float z_near, float z_far, 
 			{
 				case SPHERE:
 				{
+					float3 oc;
+					oc.x = scene->obj[hit_obj_id].pos.x - curr_origin.x;
+					oc.y = scene->obj[hit_obj_id].pos.y - curr_origin.y;
+					oc.z = scene->obj[hit_obj_id].pos.z - curr_origin.z;
+					float tca = dot(oc, curr_dir);
+					float radius2 = scene->obj[hit_obj_id].radius * scene->obj[hit_obj_id].radius;
+					float d2 = dot(oc, oc) - tca * tca;
+					float thc = sqrtf(radius2 - d2);
+					float t0 = tca - thc;
+					float t1 = tca + thc;
+					if (t0 > t1)
+					{
+						float temp = t0;
+						t0 = t1;
+						t1 = temp;
+					}
+					if (t0 < 0.0f)
+					{
+						inside_factor = -1;
+					}
+
 					normal.x = (float)(point.x - scene->obj[hit_obj_id].pos.x) / (float)scene->obj[hit_obj_id].radius;
 					normal.y = (float)(point.y - scene->obj[hit_obj_id].pos.y) / (float)scene->obj[hit_obj_id].radius;
 					normal.z = (float)(point.z - scene->obj[hit_obj_id].pos.z) / (float)scene->obj[hit_obj_id].radius;
+					normal = normalize(normal);
+
+					normal.x *= inside_factor;
+					normal.y *= inside_factor;
+					normal.z *= inside_factor;
 
 					break;
 				}
@@ -888,6 +935,10 @@ __device__ float3	trace(float3 &origin, float3 &dir, float z_near, float z_far, 
 					v2.y = point.y - a.y;
 					v2.z = point.z - a.z;
 
+					float det = dot(v0, cross(curr_dir, v1));
+					if (det < 0.0f)
+						inside_factor = -1;
+
 					float d00 = dot(v0, v0);
 					float d01 = dot(v0, v1);
 					float d11 = dot(v1, v1);
@@ -904,6 +955,10 @@ __device__ float3	trace(float3 &origin, float3 &dir, float z_near, float z_far, 
 					normal.z = barycentric.x * a_n.z + barycentric.y * b_n.z + barycentric.z * c_n.z;
 					normal = normalize(normal);
 
+					normal.x *= inside_factor;
+					normal.y *= inside_factor;
+					normal.z *= inside_factor;
+
 					break;
 				}
 			}
@@ -911,32 +966,52 @@ __device__ float3	trace(float3 &origin, float3 &dir, float z_near, float z_far, 
 			float2 uv;
 			float3 albedo = scene->obj[hit_obj_id].albedo;
 			float metalness = scene->obj[hit_obj_id].metalness;
-			float roughness = scene->obj[hit_obj_id].roughness;
+			float reflectance_roughness = scene->obj[hit_obj_id].reflectance_roughness;
+			float transparency_roughness = scene->obj[hit_obj_id].transparency_roughness;
 			float reflectance = scene->obj[hit_obj_id].reflectance;
+			float transparency = scene->obj[hit_obj_id].transparency;
+			float absorption = scene->obj[hit_obj_id].absorption;
+			float fresnel_reflectance = scene->obj[hit_obj_id].fresnel_reflectance;
 			float ior = scene->obj[hit_obj_id].ior;
 			float emissive = scene->obj[hit_obj_id].emissive;
 
 			int albedo_id = scene->obj[hit_obj_id].albedo_id;
 			int metalness_id = scene->obj[hit_obj_id].metalness_id;
-			int roughness_id = scene->obj[hit_obj_id].roughness_id;
+			int reflectance_roughness_id = scene->obj[hit_obj_id].reflectance_roughness_id;
+			int transparency_roughness_id = scene->obj[hit_obj_id].transparency_roughness_id;
 			int reflectance_id = scene->obj[hit_obj_id].reflectance_id;
+			int transparency_id = scene->obj[hit_obj_id].transparency_id;
+			int absorption_id = scene->obj[hit_obj_id].absorption_id;
+			int fresnel_reflectance_id = scene->obj[hit_obj_id].fresnel_reflectance_id;
 			int ior_id = scene->obj[hit_obj_id].ior_id;
 			int normal_id = scene->obj[hit_obj_id].normal_id;
 			int emissive_id = scene->obj[hit_obj_id].emissive_id;
 
-			if (albedo_id >= 0 || metalness_id >= 0 || roughness_id >= 0 || normal_id >= 0 || emissive_id >= 0 || reflectance_id >= 0 || ior_id >= 0)
+			if (albedo_id >= 0 || metalness_id >= 0 || reflectance_roughness_id >= 0 || transparency_roughness_id >= 0
+								|| normal_id >= 0 || emissive_id >= 0 || reflectance_id >= 0 || absorption_id >= 0
+								|| fresnel_reflectance_id >= 0 || transparency_id >= 0 || ior_id >= 0)
+			{
 				uv = generate_uv(point, normal, barycentric, scene, g_tex, hit_obj_id);
+			}
 
 			if (albedo_id >= 0)
 				albedo = tex_2d(uv, g_tex, albedo_id);
 			if (metalness_id >= 0)
 				metalness = tex_2d(uv, g_tex, metalness_id).x;
-			if (roughness_id >= 0)
-				roughness = tex_2d(uv, g_tex, roughness_id).x;
+			if (reflectance_roughness_id >= 0)
+				reflectance_roughness = tex_2d(uv, g_tex, reflectance_roughness_id).x;
+			if (transparency_roughness_id >= 0)
+				transparency_roughness = tex_2d(uv, g_tex, transparency_roughness_id).x;
 			if (reflectance_id >= 0)
 				reflectance = tex_2d(uv, g_tex, reflectance_id).x;
+			if (transparency_id >= 0)
+				transparency = tex_2d(uv, g_tex, reflectance_id).x;
+			if (absorption_id >= 0)
+				absorption = tex_2d(uv, g_tex, absorption_id).x;
+			if (fresnel_reflectance_id >= 0)
+				fresnel_reflectance = tex_2d(uv, g_tex, fresnel_reflectance_id).x;
 			if (ior_id >= 0)
-				ior = tex_2d(uv, g_tex, ior_id).x + 1.0f;
+				ior = tex_2d(uv, g_tex, ior_id).x * ior;
 			if (normal_id >= 0)
 				normal = normal_map(normal, uv, g_tex, normal_id);
 			if (emissive_id >= 0)
@@ -945,19 +1020,56 @@ __device__ float3	trace(float3 &origin, float3 &dir, float z_near, float z_far, 
 
 			float3 d_brdf, s_brdf, brdf;
 			float pdf = 1.0f, cost = 0.0f;
+			float roughness = reflectance_roughness;
 
-			float fr = fresnel(curr_dir, normal, curr_ior, ior);
-			roughness = fminf(roughness, fmaxf((1.0f - reflectance) * roughness, fr));
+			float3 perfect_ray, hemi_sample_ray;
+			perfect_ray = reflect(curr_dir, normal);
+			hemi_sample_ray = sample_brdf(normal, curand_state, roughness);
 
 
-			float3 refl_ray = reflect(curr_dir, normal);
-			float3 hemi_sample = sample_brdf(normal, curand_state, roughness);
-			curr_dir = lerp(refl_ray, hemi_sample, roughness);
+			float _fr = fresnel(curr_dir, normal, inside_factor == 1 ? env_ior : ior, inside_factor == -1 ? ior : env_ior);
+			float refl_chance = _fr;
+			float refr_chance = 1.0f - _fr;
+			float refl_factor = (float)reflectance / 0.5f;
+			float refr_factor = (float)transparency / 0.5f;
+			refl_chance = fminf(1.0f, refl_chance * refl_factor);
+			refr_chance = fminf(1.0f, refr_chance * refr_factor);
+			float rem = 1.0f - refl_chance - refr_chance;
+			refl_chance += rem * refl_factor;
+			refr_chance += rem * refr_factor;
+
+			float ray_roll = curand_uniform(*&curand_state);
+			if (refl_chance > 0.0f && ray_roll < refl_chance)
+			{
+				roughness = fminf(reflectance_roughness, fmaxf((1.0f - fresnel_reflectance) * reflectance_roughness, 1.0f - _fr));
+
+				perfect_ray = reflect(curr_dir, normal);
+				hemi_sample_ray = sample_brdf(normal, curand_state, roughness);
+			}
+			else if (refr_chance > 0.0f && ray_roll < refl_chance + refr_chance)
+			{
+				roughness = transparency_roughness;
+
+				float3 n_normal = make_float3(-normal.x, -normal.y, -normal.z);
+				perfect_ray = refract(curr_dir, normal, inside_factor == 1 ? env_ior : ior, inside_factor == 1 ? ior : env_ior);
+				hemi_sample_ray = sample_brdf(n_normal, curand_state, roughness);
+			}
+			else
+			{
+				roughness = fminf(reflectance_roughness, fmaxf((1.0f - fresnel_reflectance) * reflectance_roughness, 1.0f - _fr));
+
+				perfect_ray = reflect(curr_dir, normal);
+				hemi_sample_ray = sample_brdf(normal, curand_state, roughness);
+			}
+			curr_dir = lerp(perfect_ray, hemi_sample_ray, roughness);
 
 
 			cost = fmaxf(EPSILON, dot(normal, curr_dir));
 			pdf = lerp(1.0f, D_PDF_CONST, roughness);
-			curr_origin = point;
+			//curr_origin = point;
+			curr_origin.x = point.x + EPSILON * curr_dir.x;
+			curr_origin.y = point.y + EPSILON * curr_dir.y;
+			curr_origin.z = point.z + EPSILON * curr_dir.z;
 
 			float d_brdf_p = 1.0f / (float)M_PI;
 			float d_brdf_factor = d_brdf_p * roughness;
@@ -977,7 +1089,6 @@ __device__ float3	trace(float3 &origin, float3 &dir, float z_near, float z_far, 
 
 
 
-
 			float3 emission = albedo;
 			emission.x *= emissive;
 			emission.y *= emissive;
@@ -993,11 +1104,18 @@ __device__ float3	trace(float3 &origin, float3 &dir, float z_near, float z_far, 
 			throughput.y *= ((float)cost / (float)pdf * brdf.y + emission.y);
 			throughput.z *= ((float)cost / (float)pdf * brdf.z + emission.z);
 
-
-			if (b >= 3)
+			if (inside_factor == -1)
 			{
-				float p = fmaxf(0.05f, 1.0f - throughput.y);
-				if (curand_uniform(*&curand_state) < p)
+				throughput.x *= expf(-albedo.x * dist * absorption);
+				throughput.y *= expf(-albedo.y * dist * absorption);
+				throughput.z *= expf(-albedo.z * dist * absorption);
+			}
+
+
+			if (b >= CUTOFF_THRESHOLD)
+			{
+				float p = fmaxf(throughput.x, fmaxf(throughput.y, throughput.z));
+				if (curand_uniform(*&curand_state) > p)
 					break;
 
 				throughput.x /= (float)(1.0f - p);

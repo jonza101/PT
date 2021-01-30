@@ -10,12 +10,6 @@
     <Filter Include="src\cuda">
       <UniqueIdentifier>{e24085e4-c219-4d8d-8da3-f75112b2ac07}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\sphere">
-      <UniqueIdentifier>{604c9fb6-c284-4705-a1e6-2c27b63cba66}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\triangle">
-      <UniqueIdentifier>{7fdb8ce8-6383-4f95-822d-5c35ece9681f}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="init.cpp">
