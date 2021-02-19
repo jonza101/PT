@@ -2,9 +2,7 @@
 
 #include <cuda_runtime.h>
 
-
-#define MAX_BOUNCES 10
-#define CUTOFF_THRESHOLD 5
+#include "const.h"
 
 
 struct				gpu_cam
@@ -76,10 +74,27 @@ struct				d_obj_data
 	float			radius;
 };
 
+struct				d_vol_data
+{
+	int				obj_type;
+	int				bvh_type;
+
+	int				shadow_visibility;
+	float3			bounds[2];
+	int				id_range[2];
+
+	float			plane_d_near[BOUNDING_PLANES];
+	float			plane_d_far[BOUNDING_PLANES];
+};
+
 struct				gpu_scene
 {
 	int				obj_count;
 	d_obj_data		*obj;
+
+	int				vol_count;
+	d_vol_data		*vol;
+	float3			bvh_plane_normal[BOUNDING_PLANES];
 
 	int				light_count;
 	d_light_data	*light;

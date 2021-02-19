@@ -6,26 +6,10 @@
 class sphere : public shape
 {
 private:
-	void		set_sphere_props(const float3 &pos, const float3 &orientation, float radius, bool is_light, float intensity)
+	sphere(const float3 &pos, const float3 &orientation, float radius, material_data mat_data, float intensity)
 	{
 		this->type = SPHERE;
-		this->is_light = is_light;
-
-		this->pos = pos;
-		this->orientation = orientation;
-		this->radius = radius;
-
-		this->intensity = intensity;
-	}
-
-public:
-	float		radius;
-
-
-	sphere(const float3 &pos, const float3 &orientation, float radius, material_data mat_data, bool is_light = false, float intensity = 0.0f)
-	{
-		this->type = SPHERE;
-		this->is_light = is_light;
+		this->is_light = intensity > 0.0f;
 
 		this->pos = pos;
 		this->orientation = orientation;
@@ -59,8 +43,26 @@ public:
 		this->uv_scale = mat_data.uv_scale;
 	}
 
+public:
+	float		radius;
 
-	void	d_malloc(gpu_scene *h_scene, const int id, cudaError_t &cuda_status) override
+	static void		create_sphere(const float3 &pos, const float3 &orientation, float radius, material_data mat_data, float intensity, std::vector<shape*> &obj, std::vector<vol_data> &vol)
+	{
+		obj.push_back(new sphere(pos, orientation, radius, mat_data, intensity));
+
+		vol.push_back(vol_data());
+		vol_data &_vol = vol[vol.size() - 1];
+		_vol.shadow_visibility = mat_data.shadow_visibility;
+		_vol.obj_type = SPHERE;
+		_vol.range[0] = obj.size() - 1;
+		_vol.range[1] = obj.size() - 1;
+
+		_vol.vol_min = make_float3(pos.x - radius, pos.y - radius, pos.z - radius);
+		_vol.vol_max = make_float3(pos.x + radius, pos.y + radius, pos.z + radius);
+	}
+
+
+	void			d_malloc(gpu_scene *h_scene, const int id, cudaError_t &cuda_status) override
 	{
 		h_scene->obj[id].type = this->type;
 		h_scene->obj[id].is_light = this->is_light;

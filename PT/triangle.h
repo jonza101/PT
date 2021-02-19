@@ -65,6 +65,8 @@ public:
 		this->fresnel_reflectance = mat_data.fresnel_reflectance;
 		this->ior = mat_data.ior;
 		this->emissive = mat_data.emissive;
+
+		this->uv_scale = mat_data.uv_scale;
 	}
 
 

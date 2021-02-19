@@ -60,6 +60,8 @@ void	PT::screenshot(const char *file_path)
 	SDL_Surface *surf = this->get_surf_from_pixels(this->h_data, this->win_wh.x, this->win_wh.y);
 	IMG_SavePNG(surf, file_path);
 	std::cout << "Saved to " << file_path << '\n';
+
+	exit(0);
 }
 
 
@@ -94,7 +96,6 @@ void	PT::update()
 		start_ticks = curr_ticks;
 
 		this->screenshot("screenshots/pt__test.png");
-		exit(0);
 	}
 }
 

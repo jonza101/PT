@@ -20,6 +20,8 @@
 #include <vector>
 
 
+#include "const.h"
+
 #include "matrix.h"
 
 #include "camera.h"
@@ -29,16 +31,8 @@
 #include "light.h"
 
 #include "sphere.h"
-#include "plane.h"
 #include "triangle.h"
 #include "mesh.h"
-
-
-#define EPSILON 0.000001f
-
-#define D_PDF_CONST ((float)1.0 / (float)(2.0f * M_PI))
-#define HDR_CONST (1.0f / 2.2f)
-
 
 
 class PT
@@ -95,7 +89,6 @@ public:
 
 	SDL_Surface				*get_surf_from_pixels(void *data, int w, int h);
 
-	void					merge_imgs();
 	void					rma_convert();
 	void					screenshot(const char *file_path);
 
@@ -115,6 +108,7 @@ private:
 	float					scale;
 
 	std::vector<shape*>		obj;
+	std::vector<vol_data>	vol;
 	std::vector<light*>		lights;
 	float3					background_color = make_float3(0.0f, 0.0f, 0.0f);
 	float					env_ior = 1.0f;

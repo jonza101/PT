@@ -61,15 +61,6 @@ __device__ float3	lerp(const float3 &a, const float3 &b, float factor)
 	return (vec);
 }
 
-__device__ float	distance(const float3 &a, const float3 &b)
-{
-	float dx = a.x - b.x;
-	float dy = a.y - b.y;
-	float dz = a.z - b.z;
-
-	return (sqrtf(dx * dx + dy * dy + dz * dz));
-}
-
 
 __device__ float3	reflect(const float3 &i, const float3 &n)
 {
@@ -91,7 +82,7 @@ __device__ float3	refract(const float3 &i, const float3 &n, float etai, float et
 	float eta = (float)etai / (float)etat;
 	float k = 1.0f - eta * eta * (1.0f - cosi * cosi); 
 	if (k < 0.0f)
-		return (i);
+		return (make_float3(0.0f, 0.0f, 0.0f));				//	i
 
 	k = sqrtf(k);
 	float3 r;
@@ -121,6 +112,17 @@ __device__ float	fresnel(const float3 &i, const float3 &n, float etai, float eta
 	return (ret);
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+__device__ float3	operator * (const float3 &lhs, const float3 &rhs)
+{
+	float3 vec;
+	vec.x = lhs.x * rhs.x;
+	vec.y = lhs.y * rhs.y;
+	vec.z = lhs.z * rhs.z;
+
+	return (vec);
+}
 
 
 __device__ float3	sample_brdf(const float3 &normal, curandState *curand_state, float roughness)
@@ -273,31 +275,116 @@ __device__ float3	tex_cube(const float3 &d, gpu_tex *g_tex, gpu_scene *scene)
 }
 
 
+__device__ int		box_volume_intersection(const float3 &origin, const float3 &dir, gpu_scene *scene, int vol_id)
+{
+	float tx_min, tx_max;
+	float ty_min, ty_max;
+	float tz_min, tz_max;
+
+	float3 inv_dir;
+	inv_dir.x = 1.0f / (float)dir.x;
+	inv_dir.y = 1.0f / (float)dir.y;
+	inv_dir.z = 1.0f / (float)dir.z;
+	int sign[3] = { inv_dir.x < 0.0f, inv_dir.y < 0.0f, inv_dir.z < 0.0f };
+
+	tx_min = (scene->vol[vol_id].bounds[sign[0]].x - origin.x) * inv_dir.x;
+	tx_max = (scene->vol[vol_id].bounds[1 - sign[0]].x - origin.x) * inv_dir.x;
+	ty_min = (scene->vol[vol_id].bounds[sign[1]].y - origin.y) * inv_dir.y;
+	ty_max = (scene->vol[vol_id].bounds[1 - sign[1]].y - origin.y) * inv_dir.y;
+	if (tx_min > ty_max || ty_min > tx_max)
+		return (0);
+	if (ty_min > tx_min)
+		tx_min = ty_min;
+	if (ty_max < tx_max)
+		tx_max = ty_max;
+
+	tz_min = (scene->vol[vol_id].bounds[sign[2]].z - origin.z) * inv_dir.z;
+	tz_max = (scene->vol[vol_id].bounds[1 - sign[2]].z - origin.z) * inv_dir.z;
+	if (tx_min > tz_max || tz_min > tx_max)
+		return (0);
+	/*if (tz_min > tx_min)
+		tx_min = tz_min; 
+	if (tz_max < tx_max)
+		tx_max = tz_max;*/
+
+	return (1);
+}
+
+__device__ int		plane_volume_intersection(const float3 &origin, const float3 &dir, gpu_scene *scene, int vol_id, float *n_dot_o, float *n_dot_d)
+{
+	float t_near = -INFINITY;
+	float t_far = INFINITY;
+	
+	int i = -1;
+	while (++i < BOUNDING_PLANES)
+	{
+		float near = (float)(scene->vol[vol_id].plane_d_near[i] - n_dot_o[i]) / (float)n_dot_d[i];
+		float far = (float)(scene->vol[vol_id].plane_d_far[i] - n_dot_o[i]) / (float)n_dot_d[i];
+		if (n_dot_d[i] < 0.0f)
+		{
+			float temp = near;
+			near = far;
+			far = temp;
+		}
+		if (near > t_near)
+			t_near = near;
+		if (far < t_far)
+			t_far = far;
+	
+		if (t_near > t_far)
+			return (0);
+	}
+
+	return (1);
+}
+
 
 __device__ int		shadow_factor(const float3 &origin, const float3 &dir, float z_near, float z_far, gpu_scene *scene, int light_id)
 {
 	float3 oc;
 
-	int i = -1;
-	while (++i < scene->obj_count)
+	float bvh_n_dot_o[BOUNDING_PLANES];
+	float bvh_n_dot_d[BOUNDING_PLANES];
+	int b = -1;
+	while (++b < BOUNDING_PLANES)
 	{
-		if (scene->light[light_id].obj_id == i)
+		bvh_n_dot_o[b] = dot(scene->bvh_plane_normal[b], origin);
+		bvh_n_dot_d[b] = dot(scene->bvh_plane_normal[b], dir);
+	}
+
+	//float3 inv_dir;
+	//inv_dir.x = 1.0f / (float)dir.x;
+	//inv_dir.y = 1.0f / (float)dir.y;
+	//inv_dir.z = 1.0f / (float)dir.z;
+	//
+	//int sign[3];
+	//sign[0] = inv_dir.x < 0.0f;
+	//sign[1] = inv_dir.y < 0.0f;
+	//sign[2] = inv_dir.z < 0.0f;
+
+
+	int v = -1;
+	while (++v < scene->vol_count)
+	{
+		if (!scene->vol[v].shadow_visibility)
 			continue;
 
-		float t = -1.0f;
-		switch (scene->obj[i].type)
+		switch (scene->vol[v].obj_type)
 		{
 			case SPHERE:
 			{
-				oc.x = scene->obj[i].pos.x - origin.x;
-				oc.y = scene->obj[i].pos.y - origin.y;
-				oc.z = scene->obj[i].pos.z - origin.z;
+				int id = scene->vol[v].id_range[0];
+				float t = -1.0f;
+
+				oc.x = scene->obj[id].pos.x - origin.x;
+				oc.y = scene->obj[id].pos.y - origin.y;
+				oc.z = scene->obj[id].pos.z - origin.z;
 
 				float tca = dot(oc, dir);
 				if (tca < 0.0f)
 					break;
 
-				float radius2 = scene->obj[i].radius * scene->obj[i].radius;
+				float radius2 = scene->obj[id].radius * scene->obj[id].radius;
 				float d2 = dot(oc, oc) - tca * tca;
 				if (d2 > radius2)
 					break;
@@ -318,65 +405,77 @@ __device__ int		shadow_factor(const float3 &origin, const float3 &dir, float z_n
 						break;
 				}
 				t = t0;
+				if (t >= z_near && t <= z_far)
+					return (0);
 
 				break;
 			}
-			case PLANE:
+			case MESH:
 			{
-				float denom = dot(scene->obj[i].orientation, dir);
+				int bvh_type = scene->vol[v].bvh_type;
+				int intersect = 0;
+				switch (bvh_type)
+				{
+					case BVH_BOX:
+					{
+						intersect = box_volume_intersection(origin, dir, scene, v);
+						break;
+					}
+					case BVH_PLANE:
+					{
+						intersect = plane_volume_intersection(origin, dir, scene, v, bvh_n_dot_o, bvh_n_dot_d);
+						break;
+					}
+				}
+				if (!intersect)
+					continue;
+				
 
-				oc.x = scene->obj[i].pos.x - origin.x;
-				oc.y = scene->obj[i].pos.y - origin.y;
-				oc.z = scene->obj[i].pos.z - origin.z;
+				int i = scene->vol[v].id_range[0] - 1;
+				while (++i <= scene->vol[v].id_range[1])
+				{
+					float t = -1.0f;
 
-				float tt = (float)dot(oc, scene->obj[i].orientation) / (float)(!denom ? 1.0 : denom);
-				t = -1.0f + (fabs(denom) > EPSILON && tt > EPSILON) * (tt + 1.0f);
+					float3 a = scene->obj[i].vert[0];
+					float3 b = scene->obj[i].vert[1];
+					float3 c = scene->obj[i].vert[2];
+
+					float3 e1, e2;
+					float3 tvec, qvec;
+
+					e1.x = b.x - a.x;
+					e1.y = b.y - a.y;
+					e1.z = b.z - a.z;
+					e2.x = c.x - a.x;
+					e2.y = c.y - a.y;
+					e2.z = c.z - a.z;
+
+					float3 pvec = cross(dir, e2);
+					float det = dot(e1, pvec);
+
+					if (det < EPSILON && det > -EPSILON)
+						continue;
+
+					float inv_det = 1.0f / (float)det;
+					tvec.x = origin.x - a.x;
+					tvec.y = origin.y - a.y;
+					tvec.z = origin.z - a.z;
+					float u = dot(tvec, pvec) * inv_det;
+					if (u < 0.0f || u > 1.0f)
+						continue;
+
+					qvec = cross(tvec, e1);
+					float v = dot(dir, qvec) * inv_det;
+					if (v < 0.0f || u + v > 1.0f)
+						continue;
+
+					t = dot(e2, qvec) * inv_det;
+					if (t >= z_near && t <= z_far)
+						return (0);
+				}
+
 				break;
 			}
-			case TRIANGLE:
-			{
-				float3 a = scene->obj[i].vert[0];
-				float3 b = scene->obj[i].vert[1];
-				float3 c = scene->obj[i].vert[2];
-
-				float3 e1, e2;
-				float3 tvec, qvec;
-
-				e1.x = b.x - a.x;
-				e1.y = b.y - a.y;
-				e1.z = b.z - a.z;
-				e2.x = c.x - a.x;
-				e2.y = c.y - a.y;
-				e2.z = c.z - a.z;
-
-				float3 pvec = cross(dir, e2);
-				float det = dot(e1, pvec);
-
-				if (det < EPSILON && det > -EPSILON)
-					break;
-
-				float inv_det = 1.0f / (float)det;
-				tvec.x = origin.x - a.x;
-				tvec.y = origin.y - a.y;
-				tvec.z = origin.z - a.z;
-				float u = dot(tvec, pvec) * inv_det;
-				if (u < 0.0f || u > 1.0f)
-					break;
-
-				qvec = cross(tvec, e1);
-				float v = dot(dir, qvec) * inv_det;
-				if (v < 0.0f || u + v > 1.0f)
-					break;
-
-				t = dot(e2, qvec) * inv_det;
-
-				break;
-			}
-		}
-
-		if (t >= z_near && t <= z_far)
-		{
-			return (0);
 		}
 	}
 
@@ -387,26 +486,47 @@ __device__ int		intersection(const float3 &origin, const float3 &dir, float z_ne
 {
 	dist = z_far;
 	int obj_id = -1;
-
 	float3 oc;
-
-	int i = -1;
-	while (++i < scene->obj_count)
+	
+	float bvh_n_dot_o[BOUNDING_PLANES];
+	float bvh_n_dot_d[BOUNDING_PLANES];
+	int b = -1;
+	while (++b < BOUNDING_PLANES)
 	{
-		float t = -1.0f;
-		switch (scene->obj[i].type)
+		bvh_n_dot_o[b] = dot(scene->bvh_plane_normal[b], origin);
+		bvh_n_dot_d[b] = dot(scene->bvh_plane_normal[b], dir);
+	}
+
+	//float3 inv_dir;
+	//inv_dir.x = 1.0f / (float)dir.x;
+	//inv_dir.y = 1.0f / (float)dir.y;
+	//inv_dir.z = 1.0f / (float)dir.z;
+	//
+	//int sign[3];
+	//sign[0] = inv_dir.x < 0.0f;
+	//sign[1] = inv_dir.y < 0.0f;
+	//sign[2] = inv_dir.z < 0.0f;
+
+
+	int v = -1;
+	while (++v < scene->vol_count)
+	{
+		switch (scene->vol[v].obj_type)
 		{
 			case SPHERE:
 			{
-				oc.x = scene->obj[i].pos.x - origin.x;
-				oc.y = scene->obj[i].pos.y - origin.y;
-				oc.z = scene->obj[i].pos.z - origin.z;
+				int id = scene->vol[v].id_range[0];
+				float t = -1.0f;
+
+				oc.x = scene->obj[id].pos.x - origin.x;
+				oc.y = scene->obj[id].pos.y - origin.y;
+				oc.z = scene->obj[id].pos.z - origin.z;
 
 				float tca = dot(oc, dir);
 				if (tca < 0.0f)
 					break;
 
-				float radius2 = scene->obj[i].radius * scene->obj[i].radius;
+				float radius2 = scene->obj[id].radius * scene->obj[id].radius;
 				float d2 = dot(oc, oc) - tca * tca;
 				if (d2 > radius2)
 					break;
@@ -427,67 +547,83 @@ __device__ int		intersection(const float3 &origin, const float3 &dir, float z_ne
 						break;
 				}
 				t = t0;
+				if (t >= z_near && t <= z_far && t < dist)
+				{
+					obj_id = id;
+					dist = t;
+				}
 
 				break;
 			}
-			case PLANE:
+			case MESH:
 			{
-				float denom = dot(scene->obj[i].orientation, dir);
+				int bvh_type = scene->vol[v].bvh_type;
+				int intersect = 0;
+				switch (bvh_type)
+				{
+					case BVH_BOX:
+					{
+						intersect = box_volume_intersection(origin, dir, scene, v);
+						break;
+					}
+					case BVH_PLANE:
+					{
+						intersect = plane_volume_intersection(origin, dir, scene, v, bvh_n_dot_o, bvh_n_dot_d);
+						break;
+					}
+				}
+				if (!intersect)
+					continue;
+			
 
-				oc.x = scene->obj[i].pos.x - origin.x;
-				oc.y = scene->obj[i].pos.y - origin.y;
-				oc.z = scene->obj[i].pos.z - origin.z;
+				int i = scene->vol[v].id_range[0] - 1;
+				while (++i <= scene->vol[v].id_range[1])
+				{
+					float t = -1.0f;
 
-				float tt = (float)dot(oc, scene->obj[i].orientation) / (float)(!denom ? 1.0 : denom);
-				t = -1.0f + (fabs(denom) > EPSILON && tt > EPSILON) * (tt + 1.0f);
+					float3 a = scene->obj[i].vert[0];
+					float3 b = scene->obj[i].vert[1];
+					float3 c = scene->obj[i].vert[2];
+
+					float3 e1, e2;
+					float3 tvec, qvec;
+
+					e1.x = b.x - a.x;
+					e1.y = b.y - a.y;
+					e1.z = b.z - a.z;
+					e2.x = c.x - a.x;
+					e2.y = c.y - a.y;
+					e2.z = c.z - a.z;
+
+					float3 pvec = cross(dir, e2);
+					float det = dot(e1, pvec);
+
+					if (det < EPSILON && det > -EPSILON)
+						continue;
+
+					float inv_det = 1.0f / (float)det;
+					tvec.x = origin.x - a.x;
+					tvec.y = origin.y - a.y;
+					tvec.z = origin.z - a.z;
+					float u = dot(tvec, pvec) * inv_det;
+					if (u < 0.0f || u > 1.0f)
+						continue;
+
+					qvec = cross(tvec, e1);
+					float v = dot(dir, qvec) * inv_det;
+					if (v < 0.0f || u + v > 1.0f)
+						continue;
+
+					t = dot(e2, qvec) * inv_det;
+					if (t >= z_near && t <= z_far && t < dist)
+					{
+						obj_id = i;
+						dist = t;
+					}
+				}
 
 				break;
 			}
-			case TRIANGLE:
-			{
-				float3 a = scene->obj[i].vert[0];
-				float3 b = scene->obj[i].vert[1];
-				float3 c = scene->obj[i].vert[2];
-
-				float3 e1, e2;
-				float3 tvec, qvec;
-
-				e1.x = b.x - a.x;
-				e1.y = b.y - a.y;
-				e1.z = b.z - a.z;
-				e2.x = c.x - a.x;
-				e2.y = c.y - a.y;
-				e2.z = c.z - a.z;
-
-				float3 pvec = cross(dir, e2);
-				float det = dot(e1, pvec);
-
-				if (det < EPSILON && det > -EPSILON)
-					break;
-
-				float inv_det = 1.0f / (float)det;
-				tvec.x = origin.x - a.x;
-				tvec.y = origin.y - a.y;
-				tvec.z = origin.z - a.z;
-				float u = dot(tvec, pvec) * inv_det;
-				if (u < 0.0f || u > 1.0f)
-					break;
-
-				qvec = cross(tvec, e1);
-				float v = dot(dir, qvec) * inv_det;
-				if (v < 0.0f || u + v > 1.0f)
-					break;
-
-				t = dot(e2, qvec) * inv_det;
-
-				break;
-			}
-		}
-
-		if (t >= z_near && t <= z_far && t < dist)
-		{
-			obj_id = i;
-			dist = t;
 		}
 	}
 
@@ -535,9 +671,7 @@ __device__ float2	generate_uv(const float3 &point, const float3 &normal, const f
 		}
 		case TRIANGLE:
 		{
-			float3 a = scene->obj[obj_id].vert[0];
-			float3 b = scene->obj[obj_id].vert[1];
-			float3 c = scene->obj[obj_id].vert[2];
+			float2 uv_scale = scene->obj[obj_id].uv_scale;
 
 			float2 a_uv = scene->obj[obj_id].uv[0];
 			float2 b_uv = scene->obj[obj_id].uv[1];
@@ -548,8 +682,8 @@ __device__ float2	generate_uv(const float3 &point, const float3 &normal, const f
 
 			//uv.x = fminf(1.0f, fmaxf(0.0f, uv.x));
 			//uv.y = fminf(1.0f, fmaxf(0.0f, uv.y));
-			uv.x = fmodf(uv.x, 1.0f);
-			uv.y = fmodf(uv.y, 1.0f);
+			uv.x = clamp(fmodf(uv.x * uv_scale.x, 1.0f), 0.0f, 1.0f);
+			uv.y = clamp(fmodf(uv.y * uv_scale.y, 1.0f), 0.0f, 1.0f);
 
 			break;
 		}
@@ -772,13 +906,9 @@ __device__ float3	estimate_direct(float3 &point, float3 &normal, gpu_scene *scen
 			}
 		}
 
-		float sh_hit = shadow_factor(point, sample_dir, EPSILON, l_dist, scene, l);
+		float sh_hit = shadow_factor(point, sample_dir, RAY_OFFSET, l_dist, scene, l);
 		float sh_factor = (float)sh_hit;
 
-
-		/*radiance.x = scene->light[l].emission.x * attenuation / (float)l_area * scene->light[l].intensity;
-		radiance.y = scene->light[l].emission.y * attenuation / (float)l_area * scene->light[l].intensity;
-		radiance.z = scene->light[l].emission.z * attenuation / (float)l_area * scene->light[l].intensity;*/
 
 		radiance.x = emission.x * attenuation / (float)l_area * scene->light[l].intensity;
 		radiance.y = emission.y * attenuation / (float)l_area * scene->light[l].intensity;
@@ -852,7 +982,7 @@ __device__ float3	trace(float3 &origin, float3 &dir, float z_near, float z_far, 
 
 
 	int b = -1;
-	while (++b < MAX_BOUNCES)	//	MAX_BOUNCES
+	while (++b < MAX_BOUNCES)
 	{
 		float dist;
 		int inside_factor = 1;
@@ -902,15 +1032,6 @@ __device__ float3	trace(float3 &origin, float3 &dir, float z_near, float z_far, 
 					normal.x *= inside_factor;
 					normal.y *= inside_factor;
 					normal.z *= inside_factor;
-
-					break;
-				}
-				case PLANE:
-				{
-					int cost = dot(curr_dir, scene->obj[hit_obj_id].orientation) > 0.0f;
-					normal.x = -scene->obj[hit_obj_id].orientation.x * cost + scene->obj[hit_obj_id].orientation.x * !cost;
-					normal.y = -scene->obj[hit_obj_id].orientation.y * cost + scene->obj[hit_obj_id].orientation.y * !cost;
-					normal.z = -scene->obj[hit_obj_id].orientation.z * cost + scene->obj[hit_obj_id].orientation.z * !cost;
 
 					break;
 				}
@@ -995,21 +1116,21 @@ __device__ float3	trace(float3 &origin, float3 &dir, float z_near, float z_far, 
 			}
 
 			if (albedo_id >= 0)
-				albedo = tex_2d(uv, g_tex, albedo_id);
+				albedo = tex_2d(uv, g_tex, albedo_id) * albedo;
 			if (metalness_id >= 0)
-				metalness = tex_2d(uv, g_tex, metalness_id).x;
+				metalness = tex_2d(uv, g_tex, metalness_id).x * metalness;
 			if (reflectance_roughness_id >= 0)
-				reflectance_roughness = tex_2d(uv, g_tex, reflectance_roughness_id).x;
+				reflectance_roughness = tex_2d(uv, g_tex, reflectance_roughness_id).x * reflectance_roughness;
 			if (transparency_roughness_id >= 0)
-				transparency_roughness = tex_2d(uv, g_tex, transparency_roughness_id).x;
+				transparency_roughness = tex_2d(uv, g_tex, transparency_roughness_id).x * transparency_roughness;
 			if (reflectance_id >= 0)
 				reflectance = tex_2d(uv, g_tex, reflectance_id).x;
 			if (transparency_id >= 0)
 				transparency = tex_2d(uv, g_tex, reflectance_id).x;
 			if (absorption_id >= 0)
-				absorption = tex_2d(uv, g_tex, absorption_id).x;
+				absorption = tex_2d(uv, g_tex, absorption_id).x * absorption;
 			if (fresnel_reflectance_id >= 0)
-				fresnel_reflectance = tex_2d(uv, g_tex, fresnel_reflectance_id).x;
+				fresnel_reflectance = tex_2d(uv, g_tex, fresnel_reflectance_id).x * fresnel_reflectance;
 			if (ior_id >= 0)
 				ior = tex_2d(uv, g_tex, ior_id).x * ior;
 			if (normal_id >= 0)
@@ -1049,6 +1170,7 @@ __device__ float3	trace(float3 &origin, float3 &dir, float z_near, float z_far, 
 			else if (refr_chance > 0.0f && ray_roll < refl_chance + refr_chance)
 			{
 				roughness = transparency_roughness;
+				metalness = 1.0f;
 
 				float3 n_normal = make_float3(-normal.x, -normal.y, -normal.z);
 				perfect_ray = refract(curr_dir, normal, inside_factor == 1 ? env_ior : ior, inside_factor == 1 ? ior : env_ior);
@@ -1066,10 +1188,9 @@ __device__ float3	trace(float3 &origin, float3 &dir, float z_near, float z_far, 
 
 			cost = fmaxf(EPSILON, dot(normal, curr_dir));
 			pdf = lerp(1.0f, D_PDF_CONST, roughness);
-			//curr_origin = point;
-			curr_origin.x = point.x + EPSILON * curr_dir.x;
-			curr_origin.y = point.y + EPSILON * curr_dir.y;
-			curr_origin.z = point.z + EPSILON * curr_dir.z;
+			curr_origin.x = point.x + RAY_OFFSET * curr_dir.x;
+			curr_origin.y = point.y + RAY_OFFSET * curr_dir.y;
+			curr_origin.z = point.z + RAY_OFFSET * curr_dir.z;
 
 			float d_brdf_p = 1.0f / (float)M_PI;
 			float d_brdf_factor = d_brdf_p * roughness;
@@ -1165,10 +1286,12 @@ __global__ void		d_render(int *data, int2 win_wh, curandState *curand_state, gpu
 	float fx = (float)x / (float)win_wh.x * 2.0f - 1.0f;
 	float fy = (float)y / (float)win_wh.y * 2.0f - 1.0f;
 
+	float3 viewport_normal = make_float3(-cam->forward.x, -cam->forward.y, -cam->forward.z);
 	float3 clr;
 	clr.x = 0.0f;
 	clr.y = 0.0f;
 	clr.z = 0.0f;
+
 
 	int i = -1;
 	while (++i < ns)

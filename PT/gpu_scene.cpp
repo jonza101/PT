@@ -48,6 +48,11 @@ void	PT::malloc_gpu_scene()
 	if ((this->cuda_status = cudaMallocManaged(&this->h_scene->obj, sizeof(d_obj_data) * obj_count)) != cudaSuccess)
 		std::cout << "h_scene cudaMallocManaged error " << this->cuda_status << ": " << cudaGetErrorName(this->cuda_status) << '\n';
 
+	int vol_count = this->vol.size();
+	this->h_scene->vol_count = vol_count;
+	if ((this->cuda_status = cudaMallocManaged(&this->h_scene->vol, sizeof(d_vol_data) * vol_count)) != cudaSuccess)
+		std::cout << "h_scene cudaMallocManaged error " << this->cuda_status << ": " << cudaGetErrorName(this->cuda_status) << '\n';
+
 	int light_count = this->lights.size();
 	this->h_scene->light_count = light_count;
 	if ((this->cuda_status = cudaMallocManaged(&this->h_scene->light, sizeof(d_light_data) * light_count)) != cudaSuccess)
@@ -74,6 +79,31 @@ void	PT::malloc_gpu_scene()
 	{
 		this->obj[i]->d_malloc(this->h_scene, i, this->cuda_status);
 	}
+
+	i = -1;
+	while (++i < vol_count)
+	{
+		this->h_scene->vol[i].obj_type = this->vol[i].obj_type;
+		this->h_scene->vol[i].bvh_type = this->vol[i].bvh_type;
+
+		this->h_scene->vol[i].shadow_visibility = this->vol[i].shadow_visibility;
+
+		this->h_scene->vol[i].bounds[0] = this->vol[i].vol_min;
+		this->h_scene->vol[i].bounds[1] = this->vol[i].vol_max;
+
+		this->h_scene->vol[i].id_range[0] = this->vol[i].range[0];
+		this->h_scene->vol[i].id_range[1] = this->vol[i].range[1];
+
+
+		int p = -1;
+		while (++p < BOUNDING_PLANES)
+		{
+			this->h_scene->bvh_plane_normal[p] = BVH_NORMALS[p];
+			this->h_scene->vol[i].plane_d_near[p] = this->vol[i].plane_d_near[p];
+			this->h_scene->vol[i].plane_d_far[p] = this->vol[i].plane_d_far[p];
+		}
+	}
+
 	i = -1;
 	while (++i < light_count)
 	{

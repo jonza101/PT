@@ -4,7 +4,9 @@
 
 #include <iostream>
 #include <algorithm>
+#include <limits.h>
 
+#include "const.h"
 #include "vec_math.h"
 #include "gpu_scene.h"
 
@@ -12,8 +14,8 @@
 enum obj_type
 {
 	SPHERE,
-	PLANE,
 	TRIANGLE,
+	MESH,
 	SHAPE_TYPE_COUNT
 };
 
@@ -74,7 +76,7 @@ struct					material_data
 	float3				albedo = make_float3(1.0f, 1.0f, 1.0f);
 	float				metalness = 1.0f;
 	float				reflectance_roughness = 1.0f;
-	float				transparency_roughness = 0.0f;
+	float				transparency_roughness = 1.0f;
 	float				reflectance = 1.0f;
 	float				transparency = 0.0f;
 	float				absorption = 0.0f;
@@ -83,4 +85,33 @@ struct					material_data
 	float				emissive = 0.0f;
 
 	float2				uv_scale = make_float2(1.0f, 1.0f);
+
+
+	int					shadow_visibility = true;
+};
+
+
+enum bound_type
+{
+	BVH_BOX,
+	BVH_PLANE,
+	BVH_COUNT
+};
+
+#define D_BVH_D_NEAR { INFINITY, INFINITY, INFINITY, INFINITY, INFINITY, INFINITY, INFINITY }
+#define D_BVH_D_FAR { -INFINITY, -INFINITY, -INFINITY, -INFINITY, -INFINITY, -INFINITY, -INFINITY }
+
+struct					vol_data
+{
+	int					obj_type;
+	int					bvh_type;
+
+	int					shadow_visibility;
+	int					range[2];
+
+	float				plane_d_near[BOUNDING_PLANES] = D_BVH_D_NEAR;
+	float				plane_d_far[BOUNDING_PLANES] = D_BVH_D_FAR;
+
+	float3				vol_min = make_float3(INFINITY, INFINITY, INFINITY);
+	float3				vol_max = make_float3(-INFINITY, -INFINITY, -INFINITY);
 };

@@ -47,7 +47,7 @@ private:
 		return (vec);
 	}
 
-	static void						load_mesh_data(int mesh_id, const float3 &pos, const float3 &rotation, const float3 &scale, material_data mat_data, std::vector<shape*> &obj)
+	static void						load_mesh_data(int mesh_id, const float3 &pos, const float3 &rotation, const float3 &scale, material_data mat_data, bound_type bvh_type, std::vector<shape*> &obj, std::vector<vol_data> &vol)
 	{
 		if (mesh_id < 0 || mesh_id >= mesh::meshes.size())
 			return;
@@ -56,6 +56,15 @@ private:
 		mat4x4 r = mat4x4::create_rot_mat(rotation);
 		mat4x4 s = mat4x4::create_scale_mat(scale);
 		mat4x4 world_mat = t * r * s;
+
+
+		vol.push_back(vol_data());
+		vol_data &_vol = vol[vol.size() - 1];
+		_vol.shadow_visibility = mat_data.shadow_visibility;
+		_vol.obj_type = MESH;
+		_vol.bvh_type = bvh_type;
+		_vol.range[0] = obj.size();
+
 
 		int i = -1;
 		while (++i < mesh::meshes[mesh_id].tri_data.size())
@@ -76,7 +85,41 @@ private:
 			float2 uv[3] = { tri_data.uv[0], tri_data.uv[1], tri_data.uv[2] };
 
 			obj.push_back(new triangle(vert, norm, uv, mat_data));
+
+
+			int f = -1;
+			while (++f < 3)
+			{
+				if (vert[f].x < _vol.vol_min.x)
+					_vol.vol_min.x = vert[f].x;
+				if (vert[f].y < _vol.vol_min.y)
+					_vol.vol_min.y = vert[f].y;
+				if (vert[f].z < _vol.vol_min.z)
+					_vol.vol_min.z = vert[f].z;
+
+				if (vert[f].x > _vol.vol_max.x)
+					_vol.vol_max.x = vert[f].x;
+				if (vert[f].y > _vol.vol_max.y)
+					_vol.vol_max.y = vert[f].y;
+				if (vert[f].z > _vol.vol_max.z)
+					_vol.vol_max.z = vert[f].z;
+			}
+
+			int p = -1;
+			while (++p < BOUNDING_PLANES)
+			{
+				int f = -1;
+				while (++f < 3)
+				{
+					float d = h_dot(BVH_NORMALS[p], vert[f]);//BVH_NORMALS[p].x * vert[f].x + BVH_NORMALS[p].y * vert[f].y + BVH_NORMALS[p].z * vert[f].z;
+					_vol.plane_d_near[p] = fminf(d, _vol.plane_d_near[p]);
+					_vol.plane_d_far[p] = fmaxf(d, _vol.plane_d_far[p]);
+				}
+			}
 		}
+
+
+		_vol.range[1] = obj.size() - 1;
 	}
 
 public:
@@ -141,8 +184,8 @@ public:
 	}
 
 
-	static void						create_mesh(int mesh_id, const float3 &pos, const float3 &rotation, const float3 &scale, material_data mat_data, std::vector<shape*> &obj)
+	static void						create_mesh(int mesh_id, const float3 &pos, const float3 &rotation, const float3 &scale, material_data mat_data, bound_type bvh_type, std::vector<shape*> &obj, std::vector<vol_data> &vol)
 	{
-		mesh::load_mesh_data(mesh_id, pos, rotation, scale, mat_data, obj);
+		mesh::load_mesh_data(mesh_id, pos, rotation, scale, mat_data, bvh_type, obj, vol);
 	}
 };

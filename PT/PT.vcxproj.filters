@@ -44,9 +44,6 @@
     <ClInclude Include="gpu_scene.h">
       <Filter>inc</Filter>
     </ClInclude>
-    <ClInclude Include="plane.h">
-      <Filter>inc</Filter>
-    </ClInclude>
     <ClInclude Include="image.h">
       <Filter>inc</Filter>
     </ClInclude>
@@ -60,6 +57,9 @@
       <Filter>inc</Filter>
     </ClInclude>
     <ClInclude Include="light.h">
+      <Filter>inc</Filter>
+    </ClInclude>
+    <ClInclude Include="const.h">
       <Filter>inc</Filter>
     </ClInclude>
   </ItemGroup>
