@@ -16,7 +16,7 @@ __global__ void		init_kernel(curandState *curand_state, int2 win_wh)
 
 void	PT::init_gpu_kernel()
 {
-	this->d_block_size = dim3(20, 20);
+	this->d_block_size = dim3(this->d_threads * 0.5f, this->d_threads * 0.5f);
 	this->d_grid_size.x = ceilf(float(this->win_wh.x) / (float)this->d_block_size.x);
 	this->d_grid_size.y = ceilf(float(this->win_wh.y) / (float)this->d_block_size.y);
 

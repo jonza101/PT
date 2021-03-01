@@ -67,36 +67,22 @@ void	PT::screenshot(const char *file_path)
 
 void	PT::update()
 {
-	SDL_Event sdl_event;
-
 	Uint32 start_ticks = SDL_GetTicks();
 
-	bool is_running = 1;
-	while (is_running)
-	{
-		while (SDL_PollEvent(&sdl_event))
-		{
-			if (sdl_event.type == SDL_WINDOWEVENT)
-			{
-				if (sdl_event.window.event == SDL_WINDOWEVENT_CLOSE)
-					is_running = 0;
-			}
-		}
+	
+	//this->cpy_gpu_camera();
+	this->render();
 
-		//this->cpy_gpu_camera();
-		this->render();
+	SDL_UpdateTexture(this->txt, 0, this->h_data, this->win_wh.x * sizeof(int));
+	SDL_RenderCopy(this->ren, this->txt, NULL, NULL);
+	SDL_RenderPresent(this->ren);
 
-		SDL_UpdateTexture(this->txt, 0, this->h_data, this->win_wh.x * sizeof(int));
-		SDL_RenderCopy(this->ren, this->txt, NULL, NULL);
-		SDL_RenderPresent(this->ren);
+	Uint32 curr_ticks = SDL_GetTicks();
+	std::cout << curr_ticks - start_ticks << " ms\n";
+	start_ticks = curr_ticks;
 
 
-		Uint32 curr_ticks = SDL_GetTicks();
-		std::cout << curr_ticks - start_ticks << " ms\n";
-		start_ticks = curr_ticks;
-
-		this->screenshot("screenshots/pt__test.png");
-	}
+	this->screenshot(this->screenshot_path);
 }
 
 int		main()

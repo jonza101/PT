@@ -51,6 +51,7 @@ private:
 	{
 		if (mesh_id < 0 || mesh_id >= mesh::meshes.size())
 			return;
+		
 
 		mat4x4 t = mat4x4::create_translate_mat(pos);
 		mat4x4 r = mat4x4::create_rot_mat(rotation);
@@ -74,6 +75,7 @@ private:
 			float3 a = world_mat * tri_data.vert[0];
 			float3 b = world_mat * tri_data.vert[1];
 			float3 c = world_mat * tri_data.vert[2];
+			
 
 			mat4x4 normal_mat = mat4x4::transpose(mat4x4::inverse(world_mat));
 			float3 a_n = normal_mat * tri_data.norm[0];

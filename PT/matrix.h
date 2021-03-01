@@ -128,14 +128,15 @@ public:
 	}
 
 
-	static mat4x4		create_rot_mat(const float3 &rotation)			//	Z * Y * X
+	//					YAW - Y; PITCH - X; ROLL - Z
+	static mat4x4		create_rot_mat(const float3 &rotation)			//		Y X Z
 	{
 		mat4x4 mat;
 
 		mat4x4 x = mat4x4::create_rot_mat_x(rotation.x);
 		mat4x4 y = mat4x4::create_rot_mat_y(rotation.y);
 		mat4x4 z = mat4x4::create_rot_mat_z(rotation.z);
-		mat = z * y * x;
+		mat = y * x * z;
 
 		return (mat);
 	}
@@ -183,7 +184,7 @@ public:
 		{
 			int j = -1;
 			while (++j < 4)
-				mat[i][j] = this->m[i][0] * m[0][j] + this->m[i][1] * m[1][j] + this->m[i][2] * m[2][j] + this->m[i][3] * m[3][j];
+				mat[j][i] = this->m[i][0] * m[0][j] + this->m[i][1] * m[1][j] + this->m[i][2] * m[2][j] + this->m[i][3] * m[3][j];
 		}
 
 		return (mat);

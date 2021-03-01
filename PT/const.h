@@ -1,7 +1,7 @@
 #pragma once
 
 #define EPSILON 0.000001f
-#define RAY_OFFSET 0.000001f
+#define RAY_OFFSET 0.0001f
 
 #define D_PDF_CONST ((float)1.0 / (float)(2.0f * M_PI))
 #define HDR_CONST (1.0f / 2.2f)

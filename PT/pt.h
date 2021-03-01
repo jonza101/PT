@@ -103,6 +103,9 @@ private:
 	float3					*d_data_f;
 
 
+	char					*screenshot_path = "screenshots/pt__test.png";
+
+
 	camera					cam;
 	float					aspect_ratio;
 	float					scale;

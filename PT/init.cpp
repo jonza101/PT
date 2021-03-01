@@ -75,6 +75,7 @@ void	PT::init()
 
 
 	int quad_id = mesh::load_mesh("resources/mesh/quad.obj");
+	int cube_id =  mesh::load_mesh("resources/mesh/cube.obj");
 
 
 	int nx = image::load_image("resources/cubemap/gamrig/nx.png");
@@ -140,6 +141,9 @@ void	PT::init()
 
 
 	this->malloc_gpu_scene();
+
+
+	this->screenshot_path = "screenshots/pt__test.png";
 
 
 	size_t free, total;
